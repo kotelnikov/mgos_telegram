@@ -57,6 +57,7 @@ let tgb_msg_handler = function(ed, ud) {
         TGB.send(resp.result.chat_id, 'Received command "/status"', null, null, null);
     }
     else {
+        // If you subscribed for any messages
         print('Telegram: mJS "*" handler');
         TGB.send(resp.result.chat_id, resp.result.text, null, null, null);
     }
@@ -65,7 +66,7 @@ let tgb_msg_handler = function(ed, ud) {
 // Here describe your handler for managing the subscriptions
 let tgb_start_handler = function(ev, ed, ud) {
 
-    TGB.sub('*', tgb_msg_handler, null);
+    //TGB.sub('*', tgb_msg_handler, null);
     TGB.sub('/start', tgb_msg_handler, null);
     TGB.sub('/status', tgb_msg_handler, null);
 };
