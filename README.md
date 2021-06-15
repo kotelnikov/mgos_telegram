@@ -30,9 +30,9 @@ config_schema:
 ```
 Configuration description for `config_schema` section:
 
-The property `telegram.token` is your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it here https://core.telegram.org/bots#creating-a-new-bot.
+The property `telegram.token` stores your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it here https://core.telegram.org/bots#creating-a-new-bot.
 
-The property `telegram.acl` is the Access list (ACL) represented by string, containing an array of the user and chat IDs divided by commas. Pay attention, the correct chat_id represented with mines prefix, see the second element in the example. If ACL list will be empty, or message arrived from the user or chat id witch will not in the ACL, all such messages will be ignored by the library. If you don't know how to get your own chat_id, you can "ask" the Bot @myidbot (just subscribe for the Bot and then sent him the command "/getid").
+The property `telegram.acl` stores the Access list (ACL) represented by string, containing an array of the user and chat IDs divided by commas. Pay attention, the correct chat_id represented with mines prefix, see the second element in the example. If ACL list will be empty, or message arrived from the user or chat id witch will not in the ACL, all such messages will be ignored by the library. If you don't know how to get your own chat_id, you can "ask" the Bot @myidbot (just subscribe for the Bot and then sent him the command "/getid").
 
 The property `telegram.echo_bot` switching on/off the echo mode. Pay attention this mode is enabled by default^so in work scenarios you have to turn it to "false".  In case you want to play with library you don't have to write absolutely any code in your init.js or main.c for just checking the library functionality as parrot. Just leave this option as "true" and don't write any other code. !!!But relevant ACL must be present anyway, otherwise all received messages will be ignored.
 
@@ -78,9 +78,9 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 
 `Event.addHandler(TGB.CONNECTED, callback, user_data)` Before we can subscribe the commands and send the messages, we have to wait for the Telegram Bot library successfully connects to the Telegram server. So when TGB.CONNECTED event will fired it calls the callback. 
 
-`callback` Here goes the handler for handle subscribing command. 
+`callback` Here you have to pass the handler for handle subscribing command. 
 
-`user_data` can be passed as well and it may be some pointer to the object or another data, otherwise pass the "null".
+`user_data` Here you pass the user data with the provided callback, for store some pointer to the object or another data and use it in callback later, otherwise pass the `null`.
 
 
 `TGB.sub(command_text, callback, user_data)` This method for subscribing the commands received though the Telegram Bot API (it's like some sort of mqtt subscription). 
@@ -106,7 +106,7 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 
 `callback` - If you need to receive back the response from the Telegram Bot API, according to the API https://core.telegram.org/bots/api#sendmessage or otherwise pass the `null`. Usually the Telegram Bot API returns the sent message back in case of success, or error and its description in case of an error. `TGB.parse()` method can parse such responses from the Telegram Bot API. 
 
-`user_data` - Pass here some user data in case you need to manage it in your callback (it may be some pointer to the object or another data) or otherwise pass the `null` for this argument.
+`user_data` Here you pass the user data with the provided callback, for store some pointer to the object or another data and use it in callback later, otherwise pass the `null`.
 
 
 `TGB.parse(event_data)` This is the method for parse receiving data. Before we can work with receiving data we have to parse it as an JS object.
