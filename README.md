@@ -15,7 +15,7 @@ Firstly enable the library by adding the following to your ```mos.yml``` file in
 
 ```
 libs:
-  - origin: https://github.com/kotelnikov/mgos_telegram_api
+  - origin: https://github.com/kotelnikov/mgos_telegram
     name: telegram
 ```
 
