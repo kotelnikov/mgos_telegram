@@ -76,7 +76,7 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 ```
 #### API description:
 
-`Event.addHandler(TGB.CONNECTED, callback, user_data)` Before we can subscribe the commands and send the messages, we have to wait for the Telegram Bot library successfully connects to the Telegram server. So when TGB.CONNECTED event will fired it calls the callback. 
+`Event.addHandler(TGB.CONNECTED, callback, user_data)` Before we can subscribe the commands and send the messages, we have to wait for the Telegram Bot library successfully connects to the Telegram server. So when `TGB.CONNECTED` event will fired it calls the callback. 
 
 `callback` Here you have to pass the handler for handle subscribing command. 
 
