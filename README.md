@@ -11,7 +11,7 @@ Please pay attention that the library is in "alpha" version, so any issues or su
 
 ## How to use the library
 ### Include the library and configure it for your project
-Firstly enable the library by adding the following to your ```mos.yml``` file in section ```libs```:
+Firstly enable the library by adding the following to your `mos.yml` file in section `libs`:
 
 ```
 libs:
@@ -19,7 +19,7 @@ libs:
     name: telegram
 ```
 
-Next configure the library by adding the following properties to your ```mos.yml``` in section ```config_schema```:
+Next configure the library by adding the following properties to your `mos.yml` in section `config_schema`:
 
 ```
 config_schema:
@@ -28,16 +28,16 @@ config_schema:
   - ["telegram.acl", "[111222333, -444555666]"]
   - ["telegram.echo_bot", false]
 ```
-Configuration description for ```config_schema``` section:
+Configuration description for `config_schema` section:
 
-The property ```telegram.token``` is your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it here https://core.telegram.org/bots#creating-a-new-bot.
+The property `telegram.token` is your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it here https://core.telegram.org/bots#creating-a-new-bot.
 
-The property ```telegram.acl``` is the Access list (ACL) represented by string, containing an array of the user and chat IDs divided by commas. Pay attention, the correct chat_id represented with mines prefix, see the second element in the example. If ACL list will be empty, or message arrived from the user or chat id witch will not in the ACL, all such messages will be ignored by the library. If you don't know how to get your own chat_id, you can "ask" the Bot @myidbot (just subscribe for the Bot and then sent him the command "/getid").
+The property `telegram.acl` is the Access list (ACL) represented by string, containing an array of the user and chat IDs divided by commas. Pay attention, the correct chat_id represented with mines prefix, see the second element in the example. If ACL list will be empty, or message arrived from the user or chat id witch will not in the ACL, all such messages will be ignored by the library. If you don't know how to get your own chat_id, you can "ask" the Bot @myidbot (just subscribe for the Bot and then sent him the command "/getid").
 
-The property ```telegram.echo_bot``` switching on/off the echo mode. Pay attention this mode is enabled by default^so in work scenarios you have to turn it to "false".  In case you want to play with library you don't have to write absolutely any code in your init.js or main.c for just checking the library functionality as parrot. Just leave this option as "true" and don't write any other code. !!!But relevant ACL must be present anyway, otherwise all received messages will be ignored.
+The property `telegram.echo_bot` switching on/off the echo mode. Pay attention this mode is enabled by default^so in work scenarios you have to turn it to "false".  In case you want to play with library you don't have to write absolutely any code in your init.js or main.c for just checking the library functionality as parrot. Just leave this option as "true" and don't write any other code. !!!But relevant ACL must be present anyway, otherwise all received messages will be ignored.
 
 ### mJS (restricted Java Script engine) usage
-If your prefer to develop in mJS (restricted Java Script engine) add the following code to your ```init.js``` file:
+If your prefer to develop in mJS (restricted Java Script engine) add the following code to your `init.js` file:
 
 ```js
 load("api_events.js");
@@ -76,16 +76,14 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 ```
 #### API description:
 
-`Event.addHandler(TGB.CONNECTED, callback, user_data);` 
-Before we can subscribe the commands and send the messages, we have to wait for the Telegram Bot library successfully connects to the Telegram server. So when TGB.CONNECTED event will fired it calls the callback. 
+`Event.addHandler(TGB.CONNECTED, callback, user_data)` Before we can subscribe the commands and send the messages, we have to wait for the Telegram Bot library successfully connects to the Telegram server. So when TGB.CONNECTED event will fired it calls the callback. 
 
 `callback` Here goes the handler for handle subscribing command. 
 
 `user_data` can be passed as well and it may be some pointer to the object or another data, otherwise pass the "null".
 
 
-`TGB.sub(command_text, callback, user_data);`
-This method for subscribing the commands received though the Telegram Bot API (it's like some sort of mqtt subscription). 
+`TGB.sub(command_text, callback, user_data)` This method for subscribing the commands received though the Telegram Bot API (it's like some sort of mqtt subscription). 
 
 ##### Arguments:
 
@@ -96,8 +94,7 @@ This method for subscribing the commands received though the Telegram Bot API (i
 `user_data` Pass here some user data in case you need to manage it in your callback (it may be some pointer to the object or another data) or otherwise pass the `null` for this argument.
 
 
-`TGB.send(chat_id, message_text, json_data, callback, user_data);`
-This method we use for sending messages through the Telegram Bot API.
+`TGB.send(chat_id, message_text, json_data, callback, user_data)` This method we use for sending messages through the Telegram Bot API.
 
 ##### Arguments:
 
@@ -112,9 +109,9 @@ This method we use for sending messages through the Telegram Bot API.
 `user_data` - Pass here some user data in case you need to manage it in your callback (it may be some pointer to the object or another data) or otherwise pass the `null` for this argument.
 
 
-`TGB.parse(event_data);`
-This is the method for parse receiving data. Before we can work with receiving data we have to parse it as an JS object.
+`TGB.parse(event_data)` This is the method for parse receiving data. Before we can work with receiving data we have to parse it as an JS object.
 It returns the object, which contains such properties:
+
 in case of success:
 ```
 {
@@ -125,6 +122,7 @@ in case of success:
     }
 }
 ```
+
 or in case of error:
 ```
 {
