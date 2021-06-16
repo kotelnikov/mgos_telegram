@@ -9,7 +9,7 @@ let TGB = {
   sub: function(cmd, cb, ud){
     return this._sb(cmd, cb || this._ef, ud);
   },
-  send: function(chat_id, text, obj, cb, ud){
+  pub: function(chat_id, text, obj, cb, ud){
     return this._sm(chat_id, text, JSON.stringify(obj), cb || this._ef, ud);
   },
   parse: function(p){
@@ -31,11 +31,11 @@ let tgb_msg_handler = function(ed, ud) {
   
   if (resp.result.text === '/start') {
     print('Telegram: mJS "/start" handler');
-    TGB.send(resp.result.chat_id, 'Received command "/start"', null, null, null);
+    TGB.pub(resp.result.chat_id, 'Received command "/start"', null, null, null);
   }
   else if (resp.result.text === '/status') {
     print('Telegram: mJS "/status" handler');
-    TGB.send(resp.result.chat_id, 'Received command "/status"', null, null, null);
+    TGB.pub(resp.result.chat_id, 'Received command "/status"', null, null, null);
   }
 };
 

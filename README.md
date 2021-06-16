@@ -50,16 +50,16 @@ let tgb_msg_handler = function(ed, ud) {
   
     if (resp.result.text === '/start') {
         print('Telegram: mJS "/start" handler');
-        TGB.send(resp.result.chat_id, 'Received command "/start"', null, null, null);
+        TGB.pub(resp.result.chat_id, 'Received command "/start"', null, null, null);
     }
     else if (resp.result.text === '/status') {
         print('Telegram: mJS "/status" handler');
-        TGB.send(resp.result.chat_id, 'Received command "/status"', null, null, null);
+        TGB.pub(resp.result.chat_id, 'Received command "/status"', null, null, null);
     }
     else {
         // If you subscribed for any messages
         print('Telegram: mJS "*" handler');
-        TGB.send(resp.result.chat_id, resp.result.text, null, null, null);
+        TGB.pub(resp.result.chat_id, resp.result.text, null, null, null);
     }
 };
 
@@ -94,7 +94,7 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 `user_data` Pass here some user data in case you need to manage it in your callback (it may be some pointer to the object or another data) or otherwise pass the `null` for this argument.
 
 
-`TGB.send(chat_id, message_text, json_data, callback, user_data)` This method we use for sending messages through the Telegram Bot API.
+`TGB.pub(chat_id, message_text, json_data, callback, user_data)` This method we use for sending messages through the Telegram Bot API.
 
 ##### Arguments:
 
