@@ -26,26 +26,38 @@ let TGB = {
 load("api_events.js");
 load('api_telegram.js');
 
+// Here describe your own handler for managing the receiving data
 let tgb_msg_handler = function(ed, ud) {
-  let resp = TGB.parse(ed);
   
-  if (resp.result.text === '/start') {
-    print('Telegram: mJS "/start" handler');
-    TGB.pub(resp.result.chat_id, 'Received command "/start"', null, null, null);
-  }
-  else if (resp.result.text === '/status') {
-    print('Telegram: mJS "/status" handler');
-    TGB.pub(resp.result.chat_id, 'Received command "/status"', null, null, null);
-  }
+    let resp = TGB.parse(ed);
+    
+    // Here we will manage the '/start' command
+    if (resp.result.text === '/start') {
+        print('Telegram: mJS "/start" handler');
+        TGB.pub(resp.result.chat_id, 'Received command "/start"', null, null, null);
+    }
+    // Here we will manage the '/status' command
+    else if (resp.result.text === '/status') {
+        print('Telegram: mJS "/status" handler');
+        TGB.pub(resp.result.chat_id, 'Received command "/status"', null, null, null);
+    }
+    // Here we will manage all other commands
+    // In case we subscribed for all commands
+    else {
+        print('Telegram: mJS "*" handler');
+        TGB.pub(resp.result.chat_id, resp.result.text, null, null, null);
+    }
 };
 
+// Here describe your handler for managing the subscriptions
 let tgb_start_handler = function(ev, ed, ud) {
-  // If you want to subscribe for all messages and use '*' as subscription text, see example line below
-  TGB.sub('*', tgb_msg_handler, null);
-  
-  // If you want to subscribe for certain commands use them for subscription text, see example lines below
-  TGB.sub('/start', tgb_msg_handler, null);
-  TGB.sub('status', tgb_msg_handler, null);
+    
+    // Subscribe to all received commands
+    TGB.sub('*', tgb_msg_handler, null);
+    
+    // Subscribe to certain commands
+    //TGB.sub('/start', tgb_msg_handler, null);
+    //TGB.sub('/status', tgb_msg_handler, null);
 };
 
 Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);

@@ -47,17 +47,20 @@ load('api_telegram.js');
 let tgb_msg_handler = function(ed, ud) {
   
     let resp = TGB.parse(ed);
-  
+    
+    // Here we will manage the '/start' command
     if (resp.result.text === '/start') {
         print('Telegram: mJS "/start" handler');
         TGB.pub(resp.result.chat_id, 'Received command "/start"', null, null, null);
     }
+    // Here we will manage the '/status' command
     else if (resp.result.text === '/status') {
         print('Telegram: mJS "/status" handler');
         TGB.pub(resp.result.chat_id, 'Received command "/status"', null, null, null);
     }
+    // Here we will manage all other commands
+    // In case we subscribed for all commands
     else {
-        // If you subscribed for any messages
         print('Telegram: mJS "*" handler');
         TGB.pub(resp.result.chat_id, resp.result.text, null, null, null);
     }
@@ -65,10 +68,13 @@ let tgb_msg_handler = function(ed, ud) {
 
 // Here describe your handler for managing the subscriptions
 let tgb_start_handler = function(ev, ed, ud) {
-
-    //TGB.sub('*', tgb_msg_handler, null);
-    TGB.sub('/start', tgb_msg_handler, null);
-    TGB.sub('/status', tgb_msg_handler, null);
+    
+    // Subscribe to all received commands
+    TGB.sub('*', tgb_msg_handler, null);
+    
+    // Subscribe to certain commands
+    //TGB.sub('/start', tgb_msg_handler, null);
+    //TGB.sub('/status', tgb_msg_handler, null);
 };
 
 Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
