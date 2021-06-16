@@ -3,11 +3,13 @@
 ## Overview
 The library representing simple Telegram Bot API for [Mongoose OS](https://mongoose-os.com/)  - IOT framework written by [Cesanta Software Ltd](https://cesanta.com/). 
 
-The library will be useful for projects when you need to managing your IOT devices by sending and receiving commands through the [Telegram Bot API](https://core.telegram.org/bots). The library successfully tested on ESP8266 and ESP32 from [Espressif Systems](https://www.espressif.com/).
+The library will be useful for projects where you need to manage IOT devices by sending/receiving text commands through the [Telegram Bot API](https://core.telegram.org/bots). The library successfully tested on ESP8266 and ESP32 from [Espressif Systems](https://www.espressif.com/).
 
 For using this library you have to provide firstly the connectivity to the internet for your IOT device by using the connection to the [Wi-Fi network](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the connection to the [Cellular network](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
 
-Please pay attention the library is in "alpha" version and have a lot of terminal output from any functions for debugging purposes. Any issues or suggestions are welcomed! )))
+At this stage the library supports only text messages, but later I will update it and add additional functionality. 
+
+Also please pay attention the library is in "beta" version. Any issues or suggestions are welcomed! )))
 
 ## How to use the library
 ### Include the library and configure it for your project
@@ -106,7 +108,7 @@ Argument | Description
 ------------ | -------------
 `chat_id` | With this argument you have to pass the chat/group id where you going to send current message, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
 `message_text` | With this argument you have to pass the message text you need to send, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
-`json_data` | If you prefer for using the native Telegram Bot API, pass here an object with this argument, according to the API https://core.telegram.org/bots/api#making-requests or otherwise pass the `null` for this argument.
+`json_data` | If you prefer for using the native Telegram Bot API, pass an stringified object (use function JSON.stringify()) representing sendMessage parameters for this argument, according to the API https://core.telegram.org/bots/api#sendmessage or otherwise pass `null`.
 `callback` | If you need to receive back the response from the Telegram Bot API, according to the API https://core.telegram.org/bots/api#sendmessage or otherwise pass the `null`. Usually the Telegram Bot API returns the sent message back in case of success, or error and its description in case of an error. `TGB.parse()` method can parse such responses recieved from the Telegram Bot API.
 `user_data` | With this argument you have pass the user data with the provided above callback. You can use it for storing some pointer to the object or another data, for later use when callback function will fired, otherwise pass the `null`.
 
