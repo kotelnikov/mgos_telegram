@@ -7,7 +7,7 @@ The library will be useful for projects when you need to managing your IOT devic
 
 For using this library you have to provide firstly the connectivity to the internet for your IOT device by using the connection to the [Wi-Fi network](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the connection to the [Cellular network](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
 
-Please pay attention the library is in "alpha" version, so any issues or suggestions are welcomed!!! )))
+Please pay attention the library is in "alpha" version and have a lot of terminal output from any functions for debugging purposes. Any issues or suggestions are welcomed! )))
 
 ## How to use the library
 ### Include the library and configure it for your project
