@@ -7,7 +7,7 @@ The library will be useful for projects when you need to managing your IOT devic
 
 For using this library you have to provide firstly the connectivity to the internet for your IOT device by using the connection to the [Wi-Fi network](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the connection to the [Cellular network](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
 
-Please pay attention that the library is in "alpha" version, so any issues or suggestions are welcomed!!! )))
+Please pay attention the library is in "alpha" version, so any issues or suggestions are welcomed!!! )))
 
 ## How to use the library
 ### Include the library and configure it for your project
@@ -33,7 +33,7 @@ Configuration description for `config_schema` section:
 Property | Description
 ------------ | -------------
 `telegram.token` | This property stores your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it here https://core.telegram.org/bots#creating-a-new-bot
-`telegram.acl` | This property stores the Access list (ACL) represented by string, containing an array of the user/group IDs. Pay attention, the correct group must be represented with mines prefix, see the second element in the example above. If ACL list will be empty, or message arrived from the user or chat id witch will not in the ACL, all such messages will be ignored by the library. If you don't know how to get your own chat_id, you can "ask" the Bot `@myidbot` (just subscribe for the Bot and then sent him the command `/getid`)
+`telegram.acl` | This property stores the Access list (ACL) represented by string, containing an array of the chat/group IDs. Pay attention, the correct group id must be represented with mines prefix, see the second element in the example above. If ACL list will be empty, or message arrived from the chat/group id not in the ACL, all such messages will be ignored by the library. If you don't know how to get your chat/group id, you can "ask" the Bot `@myidbot` (just subscribe for the Bot and then sent him the command `/getid`)
 `telegram.echo_bot` | This property switches on/off the echo mode. Pay attention this mode is enabled by default^so in work scenarios you have to turn it to "false".  In case you want to play with library you don't have to write absolutely any code in your `init.js` or `main.c` for just checking the library functionality as parrot. Just leave this option as "true" and don't write any other code. But relevant ACL must be present anyway, otherwise all received messages will be ignored
 
 ### mJS (restricted Java Script engine) usage
@@ -79,7 +79,6 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 
 `Event.addHandler(TGB.CONNECTED, callback, user_data)` Before we can subscribe the commands and send the messages, we have to wait for the Telegram Bot library successfully connects to the Telegram server. So when `TGB.CONNECTED` event will fired it calls the callback. 
 
-
 Argument | Description
 ------------ | -------------
 `callback` | With this argument you have to pass the callback function for handling the subscribing commands.
@@ -87,7 +86,6 @@ Argument | Description
 
 
 `TGB.sub(command_text, callback, user_data)` This method for subscribing the commands received though the Telegram Bot API (it's like some sort of mqtt subscription). 
-
 
 Argument | Description
 ------------ | -------------
@@ -98,10 +96,9 @@ Argument | Description
 
 `TGB.pub(chat_id, message_text, json_data, callback, user_data)` This method we use for sending messages through the Telegram Bot API.
 
-
 Argument | Description
 ------------ | -------------
-`chat_id` | With this argument you have to pass the chat_id or group_id where you going to send current message, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
+`chat_id` | With this argument you have to pass the chat/group id where you going to send current message, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
 `message_text` | With this argument you have to pass the message text you need to send, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
 `json_data` | If you prefer for using the native Telegram Bot API, pass here an object with this argument, according to the API https://core.telegram.org/bots/api#making-requests or otherwise pass the `null` for this argument.
 `callback` | If you need to receive back the response from the Telegram Bot API, according to the API https://core.telegram.org/bots/api#sendmessage or otherwise pass the `null`. Usually the Telegram Bot API returns the sent message back in case of success, or error and its description in case of an error. `TGB.parse()` method can parse such responses recieved from the Telegram Bot API.
