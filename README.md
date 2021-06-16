@@ -1,4 +1,4 @@
-# Mongoose OS simple Telegram Bot API library
+# Mongoose OS Telegram Bot API library
 
 ## Overview
 The library representing simple Telegram Bot API for [Mongoose OS](https://mongoose-os.com/)  - IOT framework written by [Cesanta Software Ltd](https://cesanta.com/). 
