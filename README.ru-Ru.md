@@ -1,7 +1,7 @@
 [English](https://github.com/kotelnikov/mgos_telegram/blob/main/README.md) |
 [Русский](https://github.com/kotelnikov/mgos_telegram/blob/main/README.ru-Ru.md)
 
-# Mongoose OS Telegram Bot API library
+# Библиотека Telegram Bot API для Mongoose OS 
 
 ## Краткое описание
 Данная библиотека представляет собой простое API для организации Telegram бота для фреймворка [Mongoose OS](https://mongoose-os.com/) разработанного [Cesanta Software Ltd](https://cesanta.com/). 
