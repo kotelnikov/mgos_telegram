@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include "mgos.h"
 #include "mgos_telegram.h"
 #include "mjs.h"
@@ -624,7 +625,7 @@ static void mgos_telegram_parse_response_getMe(void *source, void *dest) {
 
   mgos_telegram_getme_resp_t *tmp = (mgos_telegram_getme_resp_t*) el->response.resp;
   LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> %s", tmp->username));
-  LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> METHOD ->> %i", el->response.method));
+  LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> METHOD ->> %d", el->response.method));
   free(username);
 }
 
