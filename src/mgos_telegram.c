@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <stdint.h>
-#include <inttypes.h>
 #include "mgos.h"
 #include "mgos_telegram.h"
 #include "mjs.h"
