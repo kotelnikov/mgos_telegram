@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include "mgos.h"
 #include "mgos_telegram.h"
 #include "mjs.h"
