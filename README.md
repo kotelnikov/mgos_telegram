@@ -8,11 +8,11 @@ The library representing simple Telegram Bot API for [Mongoose OS](https://mongo
 
 The library will be useful for projects where you need to manage IOT devices by sending/receiving text commands through the [Telegram Bot API](https://core.telegram.org/bots). The library successfully tested on ESP8266 and ESP32 from [Espressif Systems](https://www.espressif.com/).
 
-For using this library you have to provide firstly the connectivity to the internet for your IOT device by using the connection to the [Wi-Fi network](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the connection to the [Cellular network](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
+For using this library you have to provide firstly the connectivity to the internet for your IOT device by using the connection to the [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the cellular connection using [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
 
-At this stage the library supports only text messages, but later I will update it and add additional functionality. 
+At this stage the library supports only simple text messages on English. In case of receiving messages on other languages or messages with unsupported data type such messages will be changed forcibly to simple text message with placeholder text "Unsupported characters, or data type". Later I will update the library with new additional functionality.
 
-Also please pay attention the library is in "beta" version. Any issues or suggestions are welcomed! )))
+Please pay attention, this is first version v1.0. So any issues or suggestions are welcomed! )))
 
 ## How to use the library
 ### Include the library and configure it for your project
@@ -37,9 +37,10 @@ Configuration description for `config_schema` section:
 
 Property | Description
 ------------ | -------------
-`telegram.token` | This property stores your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it here https://core.telegram.org/bots#creating-a-new-bot
-`telegram.acl` | This property stores the Access list (ACL) represented by string, containing an array of the chat/group IDs. Pay attention, the correct group id must be represented with mines prefix, see the second element in the example above. If ACL list will be empty, or message arrived from the chat/group id not in the ACL, all such messages will be ignored by the library. If you don't know how to get your chat/group id, you can "ask" the Bot `@myidbot` (just subscribe for the Bot and then sent him the command `/getid`)
-`telegram.echo_bot` | This property switches on/off the echo mode. Pay attention this mode is enabled by default^so in work scenarios you have to turn it to "false".  In case you want to play with library you don't have to write absolutely any code in your `init.js` or `main.c` for just checking the library functionality as parrot. Just leave this option as "true" and don't write any other code. But relevant ACL must be present anyway, otherwise all received messages will be ignored
+`telegram.enable` | This property enables the library. By default the library is disabled, so you have to enable it by passing `true`.
+`telegram.token` | This property stores your telegram token represented by the string. If you don't have your own token yet, you can find the information how to get it [here](https://core.telegram.org/bots#creating-a-new-bot).
+`telegram.acl` | This property stores the Access list (ACL) represented by string and containing an array of the User and Group IDs. Pay attention, the correct Group id must be represented with mines prefix, see the second element in the example above. If ACL list will be empty, or message arrived from the chat/group id not in the ACL, all such messages will be ignored by the library. If you don't know how to get your chat/group id, you can "ask" the Bot `@myidbot` (just subscribe for the Bot and then sent him the command `/getid`). Also you can find the id by analyzing the console logs. Information about received messages and where it comes from will be presented in console logs.
+`telegram.echo_bot` | This property switches on/off the echo mode. Pay attention this mode is enabled by default, so in work scenarios you have to turn it to "false".  In case you want to play with library you don't have to write absolutely any code in your `init.js` or `main.c` for just checking the library functionality as parrot. Just leave this option as "true" and don't write any other code. But relevant ACL must be present anyway, otherwise all received messages will be ignored
 
 ### mJS (restricted Java Script engine) usage
 If your prefer to develop in mJS (restricted Java Script engine) add the following code to your `init.js` file:
@@ -96,27 +97,27 @@ Argument | Description
 `user_data` | With this argument you pass the user data with the provided above callback. You can use it for storing some pointer to the object or another data, for later use when callback function will fired, otherwise pass the `null`.
 
 
-`TGB.sub(command_text, callback, user_data)` This method for subscribing the commands received though the Telegram Bot API (it's like some sort of mqtt subscription). 
+`TGB.sub(text, callback, user_data)` This method for subscribing the commands received though the Telegram Bot API (it's like some sort of mqtt subscription). 
 
 Argument | Description
 ------------ | -------------
-`command_text` | With this argument you have to pass the command you need to subscribe and than handle in callback. All the messages which not equal the `command_text` will be ignored. If you want to subscribe for absolutely all commands please use the asterisk sing `'*'` as "command_text" argument.
+`text` | With this argument you have to pass the command you need to subscribe and than handle in callback. All the messages which not equal the `text` will be ignored. If you want to subscribe for absolutely all commands please use the string with asterisk sing `'*'` with this argument.
 `callback` | With this argument you have pass the callback, where we will going to handle the received command. 
 `user_data` | With this argument you have pass the user data with the provided above callback. You can use it for storing some pointer to the object or another data, for later use when callback function will fired, otherwise pass the `null`.
 
 
-`TGB.pub(chat_id, message_text, json_data, callback, user_data)` This method we use for sending messages through the Telegram Bot API.
+`TGB.pub(chat_id, text, json_data, callback, user_data)` This method we use for sending messages through the Telegram Bot API.
 
 Argument | Description
 ------------ | -------------
-`chat_id` | With this argument you have to pass the chat/group id where you going to send current message, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
-`message_text` | With this argument you have to pass the message text you need to send, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
-`json_data` | If you prefer for using the native Telegram Bot API, pass an stringified object (use function JSON.stringify()) representing sendMessage parameters for this argument, according to the API https://core.telegram.org/bots/api#sendmessage or otherwise pass `null`.
-`callback` | If you need to receive back the response from the Telegram Bot API, according to the API https://core.telegram.org/bots/api#sendmessage or otherwise pass the `null`. Usually the Telegram Bot API returns the sent message back in case of success, or error and its description in case of an error. `TGB.parse()` method can parse such responses recieved from the Telegram Bot API.
+`chat_id` | With this argument you have to pass the User or Group id where you are going to send current message, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
+`text` | With this argument you have to pass the message text you need to send, or you can leave it empty `''`, if you prefer to use native Telegram Bot API (see `json_data` argument description).
+`json_data` | If you want to try the native API, you can pass here the stringified object with parameters, according to the Telegram Bot API for method [SendMessage](https://core.telegram.org/bots/api#sendmessage) or otherwise pass `null`. In this case you can leave `chat_id` and `text` as empty strings `''`.
+`callback` | If you need to receive back the response from the Telegram Bot API for the current request of SendMessage method, according to the [SendMessage API](https://core.telegram.org/bots/api#sendmessage), pass here the callback function. Otherwise pass `null`. Usually the Telegram Bot API returns the sent message back in case of success, or error and its description in case of an error. `TGB.parse()` method can parse such responses received from the Telegram Bot API.
 `user_data` | With this argument you have pass the user data with the provided above callback. You can use it for storing some pointer to the object or another data, for later use when callback function will fired, otherwise pass the `null`.
 
 
-`TGB.parse(event_data)` This is the method for parse receiving data. Before we can work with receiving data we have to parse it as an JS object. It returns the object, which contains such properties:
+`TGB.parse(event_data)` This is the method for parse receiving data. Before we can work with receiving data we have to parse it to JS object. The function returns the JS object with following properties:
 
 in case of success:
 ```js
@@ -144,7 +145,7 @@ or in case of error:
 
 Argument | Description
 ------------ | -------------
-`event_data` | With this argument you have to pass the data for parsing.
+`event_data` | With this argument you have to pass the massage data for parsing.
 
 
 ### C usage
