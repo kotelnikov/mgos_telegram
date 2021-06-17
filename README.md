@@ -116,7 +116,7 @@ Argument | Description
 `TGB.parse(event_data)` This is the method for parse receiving data. Before we can work with receiving data we have to parse it as an JS object. It returns the object, which contains such properties:
 
 in case of success:
-```
+```js
 {
     ok: true,
     result: {
@@ -129,12 +129,12 @@ in case of success:
 ```
 
 or in case of error:
-```
+```js
 {
     ok: false, 
     result: {
-        error_code: 500, 
-        description: Error description'
+        error_code: 420, 
+        description: 'Flood'
     }
 }
 ```
