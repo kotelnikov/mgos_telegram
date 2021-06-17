@@ -39,7 +39,7 @@ Property | Description
 ------------ | -------------
 `telegram.token` | Данная настройка хранит токен для подключения к Telegram API и представляет собой строку. Если у Вас нет своего токена, вы можете получить его воспользовавшись инструкцией по ссылке https://core.telegram.org/bots#creating-a-new-bot
 `telegram.acl` | Данная настройка хранит лист доступа пользователей. Настройка представлена строкой содержащей массив ID пользователей и чатов. Обратите внимание групповые чаты должны быть представлены элементом с префиксом "-", в качестве примера см. второй элемент массива в конфигурации приведенной выше. Если лист доступа пустой или пришедшее сообщение от пользователя или из группового чата который не прописан в листе, то такие сообщения будут игнорироваться. Узнать свой ID, можно подписавшись на бота `@myidbot` и спросив ID командой `/getid`.
-`telegram.echo_bot` | Эта настройка включает/выключает режим эхо бота. Обратите внимание, что по умолчанию данный параметр установлен в значение "true", т.е. в рабочей конфигурации вы должны выключить данный режим в значение "false".  Данный режим можно использовать для проверки работоспособности, достаточно оставить данный режим включенным и не писать вообще никакого кода в `init.js` или `main.c` в таком случае библиотека будет работать как попугай, присылая вам в ответ все, что вы отправляете сами. При этом важно обратить внимание на то, что в режиме эхо бота лист доступа `telegram.acl` все равно должен присутствовать, иначе входящие сообщения будут игнорироваться.
+`telegram.echo_bot` | Эта настройка включает/выключает режим эхо бота. Обратите внимание, что по умолчанию данный параметр установлен в значение "true", т.е. в рабочей конфигурации вы должны выключить данный режим в значение "false".  Данный режим можно использовать для проверки работоспособности, достаточно оставить данный режим включенным и не писать вообще никакого кода в `init.js` или `main.c`, в таком случае библиотека будет работать как попугай, присылая вам в ответ все, что вы отправляете сами. При этом важно обратить внимание на то, что в режиме эхо бота лист доступа `telegram.acl` все равно должен присутствовать, иначе входящие сообщения будут игнорироваться.
 
 ### Разработка с использованием mJS (Java Script движок для Mongoose OS)
 Если вы предпочитаете при разработке использовать mJS (Java Script движок для Mongoose OS) то добавьте в свой файл `init.js` следующий пример:
@@ -48,36 +48,36 @@ Property | Description
 load("api_events.js");
 load('api_telegram.js');
 
-// Here describe your own handler for managing the receiving data
+// Ниже описана функция обратного вызова, для обработки входящих сообщений
 let tgb_msg_handler = function(ed, ud) {
   
     let resp = TGB.parse(ed);
     
-    // Here we will manage the '/start' command
+    // Здесь обрабатывается команда '/start'
     if (resp.result.text === '/start') {
         print('Telegram: mJS "/start" handler');
         TGB.pub(resp.result.chat_id, 'Received command "/start"', null, null, null);
     }
-    // Here we will manage the '/status' command
+    // Здесь обрабатывается команда '/status'
     else if (resp.result.text === '/status') {
         print('Telegram: mJS "/status" handler');
         TGB.pub(resp.result.chat_id, 'Received command "/status"', null, null, null);
     }
-    // Here we will manage all other commands
-    // In case we subscribed for all commands
+    // Здесь обрабатывается все другие команды
     else {
         print('Telegram: mJS "*" handler');
         TGB.pub(resp.result.chat_id, resp.result.text, null, null, null);
     }
 };
 
-// Here describe your handler for managing the subscriptions
+// Ниже описана функция которая вызывается при наступлении события TGB.CONNECTED
+// В ней мы подписываемся на текстовые  команды
 let tgb_start_handler = function(ev, ed, ud) {
     
-    // Subscribe to all received commands
+    // Подписка на вообще все команды
     TGB.sub('*', tgb_msg_handler, null);
     
-    // Subscribe to certain commands
+    // Ниже пример подписки на конкретные команды
     //TGB.sub('/start', tgb_msg_handler, null);
     //TGB.sub('/status', tgb_msg_handler, null);
 };
