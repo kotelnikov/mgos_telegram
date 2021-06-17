@@ -300,7 +300,7 @@ static void mgos_telegram_rx_queue_handler(void *arg) {
   struct mgos_telegram_queue_element *el;
   el = STAILQ_FIRST(&tg->rx_queue);
 
-  LOG(LL_INFO, ("TELEGRAM ->> received message from User: %d, Chat: %d, Message: %s", el->user_id, el->chat_id, el->data));
+  LOG(LL_INFO, ("TELEGRAM ->> received message from User: %u, Chat: %i, Message: %s", el->user_id, el->chat_id, el->data));
 
   //CHECK ACCESS LIST
   if ( !mgos_telegram_acl_check(el->chat_id) ) {
@@ -394,10 +394,10 @@ static bool mgos_telegram_acl_check(uint32_t chat_id) {
   }
   
   if (res) {
-    LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_acl_check() ->> Chat ID: %d found in ACL list, accept message", chat_id));
+    LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_acl_check() ->> Chat ID: %u found in ACL list, accept message", chat_id));
   }
   else {
-    LOG(LL_INFO, ("TELEGRAM ->> mgos_telegram_acl_check() ->> Chat ID: %d not found in ACL list, ignore message", chat_id));
+    LOG(LL_INFO, ("TELEGRAM ->> mgos_telegram_acl_check() ->> Chat ID: %u not found in ACL list, ignore message", chat_id));
   }
 
   free(acl);
@@ -715,7 +715,7 @@ static void mgos_telegram_out_worker(struct mgos_telegram_queue_element *el) {
       mg_asprintf(&url, 0, "%s/bot%s/%s", tg->cfg->server, tg->cfg->token, "sendMessage");
       if (el->data != NULL) {
         pd = json_asprintf("{chat_id: %d, text: %Q}", el->chat_id, el->data);
-        LOG(LL_INFO, ("TELEGRAM ->> send message to User: %d, Message: %s", el->chat_id, el->data));
+        LOG(LL_INFO, ("TELEGRAM ->> send message to User/Chat: %i, Message: %s", el->chat_id, el->data));
       }
       else mg_asprintf(&pd, 0, el->json);
       break;
