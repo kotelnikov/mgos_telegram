@@ -25,7 +25,7 @@ config_schema:
   - ["telegram.rx_queue_len",    "i", 3,                          {title: "Telegram Bot RX queue"}]
   - ["telegram.tx_queue_len",    "i", 3,                          {title: "Telegram Bot TX queue"}]
   - ["telegram.acl",             "s", "",                         {title: "Telegram Bot access list (as JSON contains array of chat id's)"}]
-  - ["telegram.echo_bot",        "b", false,                      {title: "Telegram Bot EchoBot enable for testing"}]
+  - ["telegram.echo_bot",        "b", true,                       {title: "Telegram Bot EchoBot enable for testing"}]
 
 tags:
   - telegram
