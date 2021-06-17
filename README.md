@@ -1,3 +1,6 @@
+[English](https://github.com/kotelnikov/mgos_telegram/blob/main/README.md) |
+[Русский](https://github.com/kotelnikov/mgos_telegram/blob/main/README.ru-Ru.md)
+
 # Mongoose OS Telegram Bot API library
 
 ## Overview
