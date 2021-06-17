@@ -154,4 +154,7 @@ Description coming a bit later.
 For additional information look through the code from the library's files.
 
 ## TO-DO
-We will going to implement some additional functionality a bit later such as `editMessageText`,`editMessageReplyMarkup`,`callbackQuery`,`answerCallbackQuery`.
+We will going to implement some additional functionality a bit later, such as:
+
+- [ ] ReplyKeyboardMarkup
+- [ ] InlineKeyboardMarkup

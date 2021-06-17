@@ -154,4 +154,7 @@ Event.addHandler(TGB.CONNECTED, tgb_start_handler, null);
 Дополнительную информацию вы сможете получить изучив код библиотеки.
 
 ## TO-DO
-Позднее планируется добавление следующей функциональности `editMessageText`,`editMessageReplyMarkup`,`callbackQuery`,`answerCallbackQuery`.
+Позднее планируется добавление следующей функциональности:
+
+- [ ] ReplyKeyboardMarkup
+- [ ] InlineKeyboardMarkup
