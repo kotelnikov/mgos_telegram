@@ -118,12 +118,14 @@ Argument | Description
 in case of success:
 ```
 {
-    ok: true, 
+    ok: true,
     result: {
-        chat_id: 111222333, 
-        text: 'Text of command'
+        message_id:1872,
+        user_id: 222444555,
+        chat_id: 222444555,
+        text: 'Test message'
     }
-}
+} 
 ```
 
 or in case of error:
