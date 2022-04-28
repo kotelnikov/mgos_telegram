@@ -1,30 +1,22 @@
+/*
+ * 2021 Aleksey A. Kotelnikov <kotelnikov.www@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the ""License"");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "mgos.h"
 #include "mgos_telegram.h"
 #include "mjs.h"
-
-#define MGOS_EVENT_TGB MGOS_EVENT_BASE('T', 'G', 'B')
-
-enum mgos_telegram_event {
-  TGB_EV_DISCONNECTED = MGOS_EVENT_TGB,
-  TGB_EV_CONNECTED
-};
-
-enum mgos_telegram_method {
-  //NO METHODS  
-  noMethod,
-  //TX METHODS
-  getMe,
-  sendMessage,
-  //RX METHODS
-  newMessage,
-
-  //TODO: Implement some methods later
-  //editMessageText,
-  //editMessageReplyMarkup,
-  //callbackQuery,
-  //answerCallbackQuery,
-
-};
 
 typedef struct mgos_telegram_error_resp {
   bool ok;
@@ -54,23 +46,14 @@ typedef struct mgos_telegram_new_message_resp {
 
 struct mgos_telegram_subscription {
   char *data;
-  mg_telegram_cb_t cb;
-  void *ud;
+  mg_telegram_cb_t callback;
+  void *userdata;
   SLIST_ENTRY(mgos_telegram_subscription) next;
 };
 
-struct mgos_telegram_response {
-  bool ok;
-  char *result;
-
-  enum mgos_telegram_method method;
-  void *resp;
-};
-
-
 static const struct mjs_c_struct_member response_descr[] = {
   {"ok", offsetof(struct mgos_telegram_response, ok), MJS_STRUCT_FIELD_TYPE_BOOL, NULL},
-  {"result", offsetof(struct mgos_telegram_response, result), MJS_STRUCT_FIELD_TYPE_CHAR_PTR, NULL},
+  {"result", offsetof(struct mgos_telegram_response, result_json), MJS_STRUCT_FIELD_TYPE_CHAR_PTR, NULL},
   {NULL, 0, MJS_STRUCT_FIELD_TYPE_INVALID, NULL},
 };
 
@@ -85,8 +68,8 @@ struct mgos_telegram_queue_element {
   enum mgos_telegram_method method;
   
   struct mgos_telegram_response response;
-  mg_telegram_cb_t cb;
-  void *ud;
+  mg_telegram_cb_t callback;
+  void *userdata;
 
   STAILQ_ENTRY(mgos_telegram_queue_element) next;
 };
@@ -109,13 +92,13 @@ struct mgos_telegram {
 
 static struct mgos_telegram *tg = NULL;
 
-static void mgos_telegram_network_cb(int ev, void *ed, void *arg);
-static void mgos_telegram_start_cb(void *response, void *ud);
-static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ed, void *arg);
-static void mgos_telegram_out_cb(struct mg_connection *nc, int ev, void *ed, void *arg);
+static void mgos_telegram_network_cb(int ev, void *ev_data, void *userdata);
+static void mgos_telegram_start_cb(void *ev_data, void *userdata);
+static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ev_data, void *userdata);
+static void mgos_telegram_out_cb(struct mg_connection *nc, int ev, void *ev_data, void *userdata);
 
-static void mgos_telegram_rx_queue_handler(void *arg);
-static void mgos_telegram_tx_queue_handler(void *arg);
+static void mgos_telegram_rx_queue_handler(void *userdata);
+static void mgos_telegram_tx_queue_handler(void *userdata);
 static uint32_t mgos_telegram_parse_poll(void *source, void *dest);
 static void mgos_telegram_parse_method(void *source, void *dest);
 
@@ -135,20 +118,20 @@ static struct mgos_telegram_queue_element *mgos_telegram_queue_el_new(void);
 mgos_telegram_getme_resp_t *mgos_telegram_getme_resp_new(void);
 static void mgos_telegram_queue_el_free(struct mgos_telegram_queue_element *el);
 
-
-static void mgos_telegram_tx_queue_add(uint8_t method, int32_t chat_id, const char *data, const char *json, mg_telegram_cb_t cb, void *ud);
-
+static void mgos_telegram_tx_queue_add(uint8_t method, int32_t chat_id, const char *data, const char *json, mg_telegram_cb_t callback, void *userdata);
 
 static void mgos_telegram_poll_worker();
 static void mgos_telegram_out_worker(struct mgos_telegram_queue_element *el);
+bool mgos_telegram_check_config(const struct mgos_config_telegram *cfg);
 static struct mgos_telegram *mgos_telegram_create(const struct mgos_config_telegram *cfg);
 
 
 // TELEGRAM CALLBACKS
-static void mgos_telegram_network_cb(int ev, void *ed, void *arg) {
+static void mgos_telegram_network_cb(int ev, void *ev_data, void *userdata) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_network_cb() ->> MGOS_NET_EV_IP_ACQUIRED event fired"));
-  
-  if (tg == NULL) return;
+  (void) ev;
+  (void) ev_data;
+  (void) userdata;
 
   if (tg->nc_poll != NULL) {
     tg->nc_poll->flags |= MG_F_CLOSE_IMMEDIATELY;
@@ -158,33 +141,29 @@ static void mgos_telegram_network_cb(int ev, void *ed, void *arg) {
   if (tg->nc_out != NULL) {
     tg->nc_out->flags |= MG_F_CLOSE_IMMEDIATELY;
     tg->nc_out = NULL;
-    tg->nc_out = false;
+    tg->out_connected = false;
   }
 
   struct mgos_telegram_queue_element *el;
   el = mgos_telegram_queue_el_new();
   el->method = getMe;
-  el->cb = mgos_telegram_start_cb;
-  el->ud = NULL;
+  el->callback = mgos_telegram_start_cb;
+  el->userdata = NULL;
   STAILQ_INSERT_TAIL(&tg->tx_queue, el, next);  
 
   mgos_set_timer(500, 0, mgos_telegram_tx_queue_handler, NULL);
-
-  (void) ev;
-  (void) ed;
-  (void) arg;
 }
 
-static void mgos_telegram_start_cb(void *response, void *ud) {
+static void mgos_telegram_start_cb(void *ev_data, void *userdata) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_start_cb fn"));
+  (void) ev_data;
+  (void) userdata;
 
-  if (tg == NULL) return;
-
-  struct mgos_telegram_response *resp = (struct mgos_telegram_response *) response;
+  struct mgos_telegram_response *response = (struct mgos_telegram_response *) ev_data;
   
-  if (resp->ok) {
+  if (response->ok) {
     LOG(LL_INFO, ("TELEGRAM ->> Initializing done, bot is active!"));
-    mgos_event_trigger(TGB_EV_CONNECTED, resp);
+    mgos_event_trigger(TGB_EV_CONNECTED, response);
     mgos_set_timer(100, MGOS_TIMER_REPEAT, mgos_telegram_rx_queue_handler, NULL);
     mgos_set_timer(100, MGOS_TIMER_REPEAT, mgos_telegram_tx_queue_handler, NULL);
     mgos_telegram_poll_worker();
@@ -192,13 +171,12 @@ static void mgos_telegram_start_cb(void *response, void *ud) {
   else {
     LOG(LL_WARN, ("TELEGRAM ->> Initializing fail!"));
   }
-
-  (void) response;
-  (void) ud;
 }
 
-static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ed, void *arg) {
-  if (tg == NULL) return;
+static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ev_data, void *userdata) {
+  (void) ev;
+  (void) ev_data;
+  (void) userdata;
 
   switch (ev) {
     case MG_EV_CONNECT: {
@@ -206,7 +184,7 @@ static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ed, vo
       break;
     }
     case MG_EV_HTTP_REPLY: {
-      LOG(LL_DEBUG, ("TELEGRAM ->> Poll HTTP reply")); 
+      LOG(LL_DEBUG, ("TELEGRAM ->> Poll connection got HTTP reply")); 
       
       // IF RX QUEUE OVERFLOW WILL TRY NEXT TIME      
       if ( mgos_telegram_is_rx_queue_overflow() ) {
@@ -214,7 +192,7 @@ static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ed, vo
         break;
       }
       
-      struct http_message *hm = (struct http_message *) ed;
+      struct http_message *hm = (struct http_message *) ev_data;
       struct mgos_telegram_queue_element *el;
       el = mgos_telegram_queue_el_new();
       
@@ -232,7 +210,7 @@ static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ed, vo
       break;
     }
     case MG_EV_CLOSE: {
-      LOG(LL_DEBUG, ("TELEGRAM ->> Poll closed"));
+      LOG(LL_DEBUG, ("TELEGRAM ->> Poll connection closed"));
       tg->poll_connected = false;
       mgos_telegram_poll_worker();
       break;
@@ -241,14 +219,12 @@ static void mgos_telegram_poll_cb(struct mg_connection *nc, int ev, void *ed, vo
       break;
     }
   }
-
-  (void) ev;
-  (void) ed;
-  (void) arg;
 }
 
-static void mgos_telegram_out_cb(struct mg_connection *nc, int ev, void *ed, void *arg) {
-  if (tg == NULL) return;
+static void mgos_telegram_out_cb(struct mg_connection *nc, int ev, void *ev_data, void *userdata) {
+  (void) ev;
+  (void) ev_data;
+  (void) userdata;
 
   switch (ev) {
     case MG_EV_CONNECT: {
@@ -258,12 +234,12 @@ static void mgos_telegram_out_cb(struct mg_connection *nc, int ev, void *ed, voi
     case MG_EV_HTTP_REPLY: {
       LOG(LL_DEBUG, ("TELEGRAM ->> Out HTTP reply")); 
 
-      struct http_message *hm = (struct http_message *) ed;
-      struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) arg;
+      struct http_message *hm = (struct http_message *) ev_data;
+      struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) userdata;
 
       mgos_telegram_parse_response(hm, el);
 
-      if (el->cb != NULL) el->cb(&el->response, el->ud);
+      if (el->callback != NULL) el->callback(&el->response, el->userdata);
       STAILQ_REMOVE(&tg->tx_queue, el, mgos_telegram_queue_element, next);
       mgos_telegram_queue_el_free(el);
 
@@ -279,23 +255,19 @@ static void mgos_telegram_out_cb(struct mg_connection *nc, int ev, void *ed, voi
       break;
     }
   }
-
-  (void) ev;
-  (void) ed;
-  (void) arg;
 }
 
 
 // TELEGRAM QUEUE HANDLERS
-static void mgos_telegram_rx_queue_handler(void *arg) {
-  
-  if (tg == NULL) return;
+static void mgos_telegram_rx_queue_handler(void *userdata) {
+  (void) userdata;
+
   if (STAILQ_EMPTY(&tg->rx_queue)) return;
 
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_rx_queue_handler fn"));
   
-  struct mgos_telegram_queue_element *el;
-  el = STAILQ_FIRST(&tg->rx_queue);
+  struct mgos_telegram_queue_element *el = STAILQ_FIRST(&tg->rx_queue);
+  //el = STAILQ_FIRST(&tg->rx_queue);
 
   LOG(LL_INFO, ("TELEGRAM ->> Received message from User: %lu, Chat: %li, Message: %s", ( unsigned long )el->user_id, ( long )el->chat_id, el->data));
 
@@ -309,7 +281,6 @@ static void mgos_telegram_rx_queue_handler(void *arg) {
   //CHECK IS ECHO MODE ENABLED
   if (tg->cfg->echo_bot && el->method == newMessage) {
     LOG(LL_INFO, ("TELEGRAM ->> Echo bot mode enabled"));
-
     // IF TX QUEUE OVERFLOW WILL TRY NEXT TIME
     if ( mgos_telegram_is_tx_queue_overflow() ) {
       mgos_telegram_queue_el_free(el);
@@ -332,9 +303,9 @@ static void mgos_telegram_rx_queue_handler(void *arg) {
     if ( strcmp(s->data, "*") == 0 || strcasecmp(s->data, el->data) == 0 ) {
       res = true;
       LOG(LL_INFO, ("TELEGRAM ->> Subscription found: %s", s->data));   
-      if (s->cb != NULL) {
+      if (s->callback != NULL) {
         LOG(LL_DEBUG, ("TELEGRAM ->> Call the callback function stored in subscription..."));           
-        s->cb(&el->response, s->ud);
+        s->callback(&el->response, s->userdata);
       }
       break;
     }
@@ -346,21 +317,18 @@ static void mgos_telegram_rx_queue_handler(void *arg) {
   
   STAILQ_REMOVE(&tg->rx_queue, el, mgos_telegram_queue_element, next);
   mgos_telegram_queue_el_free(el);
-  (void) arg;
 }
 
-static void mgos_telegram_tx_queue_handler(void *arg) {
-  if (tg == NULL) return;
-  if (STAILQ_EMPTY(&tg->tx_queue)) return;
+static void mgos_telegram_tx_queue_handler(void *userdata) {
+  (void) userdata;
+
   if (tg->out_connected) return;
+  if (STAILQ_EMPTY(&tg->tx_queue)) return;
 
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_tx_queue_handler"));
   
-  struct mgos_telegram_queue_element *el;
-  el = STAILQ_FIRST(&tg->tx_queue);
+  struct mgos_telegram_queue_element *el = STAILQ_FIRST(&tg->tx_queue);
   mgos_telegram_out_worker(el);
-
-  (void) arg;
 }
 
 
@@ -429,43 +397,60 @@ static bool mgos_telegram_is_rx_queue_overflow() {
   return res;
 }
 
-void mgos_telegram_subscribe(const char *data, mg_telegram_cb_t cb, void *ud) {
+void mgos_telegram_subscribe(const char *data, mg_telegram_cb_t callback, void *userdata) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_subscribe fn"));
-  if (tg == NULL) return;
+  
+  bool res = false;
 
-  struct mgos_telegram_subscription *s = calloc(1, sizeof(*s));
-  mg_asprintf(&s->data, 0, data);
-  s->cb = cb;
-  s->ud = ud;
-  LOG(LL_INFO, ("TELEGRAM ->> Subscribe to command: %s", s->data));
-  SLIST_INSERT_HEAD(&tg->subscriptions, s, next);
+  struct mgos_telegram_subscription *s;
+  SLIST_FOREACH(s, &tg->subscriptions, next) {
+    if ( strcasecmp(s->data, data) == 0 ) {
+      res = true;
+      LOG(LL_INFO, ("TELEGRAM ->> Subscription for command %s already exist, no need to subscribe again", data));
+      break;
+    }
+  }
+
+  if (!res) {
+    struct mgos_telegram_subscription *s = calloc(1, sizeof(*s));
+    mg_asprintf(&s->data, 0, data);
+    s->callback = callback;
+    s->userdata = userdata;
+    LOG(LL_INFO, ("TELEGRAM ->> Subscribe to command: %s done", s->data));
+    SLIST_INSERT_HEAD(&tg->subscriptions, s, next);
+  }
+
 }
 
 static struct mgos_telegram_queue_element *mgos_telegram_queue_el_new(void) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_queue_el_new"));
-  struct mgos_telegram_queue_element *el;
-  el = calloc(1, sizeof(*el));
+  
+  struct mgos_telegram_queue_element *el = calloc(1, sizeof(*el));
   el->method = noMethod;
   el->data = NULL;
   el->json = NULL;
-  el->response.result = NULL;
-  //el->response.error_description = NULL;
+  el->response.data = NULL;
+  el->response.result_json = NULL;
+
   return el;
 }
 
 mgos_telegram_getme_resp_t *mgos_telegram_getme_resp_new(void) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_resp_new"));
-  mgos_telegram_getme_resp_t *r;
-  r = calloc(1, sizeof(*r));
+  
+  mgos_telegram_getme_resp_t *r = calloc(1, sizeof(*r));
   r->username = NULL;
+
   return r;
 }
 
 static void mgos_telegram_queue_el_free(struct mgos_telegram_queue_element *el) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_queue_el_free fn"));
-  free(el->response.result);
+  
   free(el->data);
   free(el->json);
+  free(el->response.result_json);
+  //free(el->response.data);
   free(el);
 }
 
@@ -477,11 +462,11 @@ const struct mjs_c_struct_member *get_response_descr(void) {
 // TELEGRAM PARSE POLL JSON FN
 static uint32_t mgos_telegram_parse_poll(void *source, void *dest) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_parse_poll()"));
-
-  uint32_t update_id = 0;
-
+  
   struct http_message *hm = (struct http_message *) source;
   struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) dest;
+
+  uint32_t update_id = 0;
   
   json_scanf(hm->body.p, hm->body.len, "{ok: %B}", &el->response.ok);
 
@@ -508,16 +493,18 @@ static uint32_t mgos_telegram_parse_poll(void *source, void *dest) {
 static void mgos_telegram_parse_method(void *source, void *dest) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_parse_method()"));
   
-  uint8_t i;
-  struct json_token t;
-
-  uint32_t tmp_int;
-
   struct http_message *hm = (struct http_message *) source;
   struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) dest;
 
+  uint8_t i;
+  struct json_token t;
+  uint32_t tmp_int;
+
   for (i = 0; json_scanf_array_elem(hm->body.p, hm->body.len, ".result", i, &t) > 0; i++) {
-    if ( json_scanf(t.ptr, t.len, "{message: {message_id: %d}}", &tmp_int) > 0) el->method = newMessage;
+    if ( json_scanf(t.ptr, t.len, "{message: {message_id: %d}}", &tmp_int) > 0) {
+      el->method = newMessage;
+      break;
+    }
   }
 
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_parse_method() ->> Method: %d", el->method)); 
@@ -548,8 +535,14 @@ static uint32_t mgos_telegram_parse_newMessage(void *source, void *dest) {
       el->response.ok = false;
     }
 
-    el->response.result = json_asprintf("{message_id: %d, user_id: %d, chat_id: %d, text: %Q}}",
-      el->msg_id, el->user_id, el->chat_id, el->data);
+    el->response.msg_id = el->msg_id;
+    el->response.user_id = el->user_id;
+    el->response.chat_id = el->chat_id;
+    el->response.data = el->data;
+
+    el->response.result_json = json_asprintf("{message_id: %d, user_id: %d, chat_id: %d, text: %Q}}", 
+                                              el->msg_id, el->user_id, el->chat_id, el->data);
+
   }
   
   return update_id;
@@ -596,7 +589,7 @@ static void mgos_telegram_parse_response_Error(void *source, void *dest) {
   struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) dest;
 
   json_scanf(hm->body.p, hm->body.len, "{error_code: %d, description: %Q}", &error_code, &description);
-  el->response.result = json_asprintf("{error_code: %d, description: %Q}", error_code, description);
+  el->response.result_json = json_asprintf("{error_code: %d, description: %Q}", error_code, description);
   
   free(description);
 }
@@ -612,17 +605,16 @@ static void mgos_telegram_parse_response_getMe(void *source, void *dest) {
   struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) dest;
 
   json_scanf(hm->body.p, hm->body.len, "{result: {id: %d, is_bot: %B, username: %Q}}", &id, &is_bot, &username);
-  el->response.result = json_asprintf("{id: %d, is_bot: %B, username: %Q}", id, is_bot, username);
+  el->response.result_json = json_asprintf("{id: %d, is_bot: %B, username: %Q}", id, is_bot, username);
   el->response.method = el->method;
 
-  mgos_telegram_getme_resp_t *r;
-  r = mgos_telegram_getme_resp_new();
-  json_scanf(hm->body.p, hm->body.len, "{result: {id: %d, is_bot: %B, username: %Q}}", &r->id, &r->is_bot, &r->username);
-  el->response.resp = r;
+  //mgos_telegram_getme_resp_t *r = mgos_telegram_getme_resp_new();
+  //json_scanf(hm->body.p, hm->body.len, "{result: {id: %d, is_bot: %B, username: %Q}}", &r->id, &r->is_bot, &r->username);
+  //el->response.resp = r;
 
-  mgos_telegram_getme_resp_t *tmp = (mgos_telegram_getme_resp_t*) el->response.resp;
-  LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> %s", tmp->username));
-  LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> METHOD ->> %d", el->response.method));
+  //mgos_telegram_getme_resp_t *tmp = (mgos_telegram_getme_resp_t*) el->response.resp;
+  //LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> %s", tmp->username));
+  //LOG(LL_DEBUG, ("TELEGRAM ->> GETME ->> METHOD ->> %d", el->response.method));
   free(username);
 }
 
@@ -635,38 +627,36 @@ static void mgos_telegram_parse_response_messageID(void *source, void *dest) {
   struct mgos_telegram_queue_element *el = (struct mgos_telegram_queue_element *) dest;
 
   json_scanf(hm->body.p, hm->body.len, "{result: {message_id: %d}}", &message_id);
-  el->response.result = json_asprintf("{message_id: %d}", message_id);
+  el->response.result_json = json_asprintf("{message_id: %d}", message_id);
 }
 
+
 // TELEGRAM SEND FN
-static void mgos_telegram_tx_queue_add(uint8_t method, int32_t chat_id, const char *data, const char *json, mg_telegram_cb_t cb, void *ud) {
-  if (tg == NULL) return;  
+static void mgos_telegram_tx_queue_add(uint8_t method, int32_t chat_id, const char *data, const char *json, mg_telegram_cb_t callback, void *userdata) {
+
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_tx_queue_add fn"));
 
-  struct mgos_telegram_queue_element *el;
-  el = mgos_telegram_queue_el_new();
-
+  struct mgos_telegram_queue_element *el = mgos_telegram_queue_el_new();
   el->method = method;
   el->chat_id = chat_id;
 
   if (json != NULL) mg_asprintf(&el->json, 0, json);
   if (data != NULL) mg_asprintf(&el->data, 0, data);
-  if (cb != NULL) el->cb = cb;
-  if (ud != NULL) el->ud = ud;
+  if (callback != NULL) el->callback = callback;
+  if (userdata != NULL) el->userdata = userdata;
 
   STAILQ_INSERT_TAIL(&tg->tx_queue, el, next);
 }
 
-void mgos_telegram_send_message(int32_t chat_id, const char *text, const char *json, mg_telegram_cb_t cb, void *ud) {
+void mgos_telegram_send_message(int32_t chat_id, const char *text, const char *json, mg_telegram_cb_t callback, void *userdata) {
   if (tg == NULL) return;
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_send_message fn"));
-  mgos_telegram_tx_queue_add(sendMessage, chat_id, text, json, cb, ud);
+  mgos_telegram_tx_queue_add(sendMessage, chat_id, text, json, callback, userdata);
 }
 
 
 // TELEGRAM HTTP FN
 static void mgos_telegram_poll_worker() {
-  if (tg == NULL) return;
   if (tg->poll_connected) return;
 
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_poll_worker fn"));
@@ -678,10 +668,12 @@ static void mgos_telegram_poll_worker() {
 
   mg_asprintf(&url, 0, "%s/bot%s/getUpdates", tg->cfg->server, tg->cfg->token);
   mg_asprintf(&eh, 0, "Content-Type: application/json\r\n");
-  pd = json_asprintf("{limit: 1, timeout: %d, offset: %d, allowed_updates: [%Q, %Q]}",
+  //pd = json_asprintf("{limit: 1, timeout: %d, offset: %d, allowed_updates: [%Q, %Q]}",
+  pd = json_asprintf("{limit: 1, timeout: %d, offset: %d, allowed_updates: [%Q]}",
     tg->cfg->timeout > 0 ? tg->cfg->timeout : 60, 
     tg->update_id > 0 ? tg->update_id + 1 : 0,
-    "message", "callback_query");
+    //"message", "callback_query");
+    "message");
 
   tg->nc_poll = mg_connect_http(mgos_get_mgr(), mgos_telegram_poll_cb, NULL, url, eh, pd);
   
@@ -691,7 +683,6 @@ static void mgos_telegram_poll_worker() {
 }
 
 static void mgos_telegram_out_worker(struct mgos_telegram_queue_element *el) {
-  if (tg == NULL) return;
   if (tg->out_connected) return;
 
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_out_worker fn"));
@@ -718,11 +709,7 @@ static void mgos_telegram_out_worker(struct mgos_telegram_queue_element *el) {
       break;
     }
     default: {
-      free(url);
-      free(eh);
-      free(pd);
       return;
-      break;
     }
   }
 
@@ -735,34 +722,26 @@ static void mgos_telegram_out_worker(struct mgos_telegram_queue_element *el) {
 
 
 // TELEGRAM CREATE FN
-
 bool mgos_telegram_check_config(const struct mgos_config_telegram *cfg) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_check_config() ->> Checking configuration..."));
   bool res = true;
   if (cfg->server == NULL || cfg->token == NULL) res = false;
-  LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_check_config() ->> Configuration seems to be %s", res ? "OK": "ERROR"));  
+  LOG(LL_INFO, ("TELEGRAM ->> mgos_telegram_check_config() ->> Configuration seems to be %s", res ? "OK": "ERROR"));  
   return res;
 }
 
 static struct mgos_telegram *mgos_telegram_create(const struct mgos_config_telegram *cfg) {
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_create() ->> Create tg object"));
-  
 
-
-
+  if (!mgos_telegram_check_config(cfg)) return NULL;
   struct mgos_telegram *tg = (struct mgos_telegram *) calloc(1, sizeof(*tg));
-  if (tg == NULL || cfg->server == NULL || cfg->token == NULL) {
-    free(tg);
-    return NULL;
-  }
 
   tg->cfg = cfg;
-
   STAILQ_INIT(&tg->rx_queue);
   STAILQ_INIT(&tg->tx_queue);
   
   LOG(LL_DEBUG, ("TELEGRAM ->> mgos_telegram_create() ->> Add handler for MGOS_NET_EV_IP_ACQUIRED event"));
-  mgos_event_add_handler(MGOS_NET_EV_IP_ACQUIRED, mgos_telegram_network_cb, tg);
+  mgos_event_add_handler(MGOS_NET_EV_IP_ACQUIRED, mgos_telegram_network_cb, NULL);
   mgos_event_register_base(MGOS_EVENT_TGB, "Telegram bot events");
   return tg;
 }
@@ -771,6 +750,7 @@ static struct mgos_telegram *mgos_telegram_create(const struct mgos_config_teleg
 bool mgos_telegram_init(void) {
   LOG(LL_INFO, ("TELEGRAM ->> mgos_telegram_init() ->> Initializing telegram bot library"));  
   if (mgos_sys_config_get_telegram_enable()) {
+
     LOG(LL_INFO, ("TELEGRAM ->> mgos_telegram_init() ->> Starting telegram bot"));
     tg = mgos_telegram_create( mgos_sys_config_get_telegram() );
     LOG(LL_INFO, ("TELEGRAM ->> mgos_telegram_init() ->> Telegram bot %s", tg != NULL ? "successfully started" : "starting unsuccessful"));
