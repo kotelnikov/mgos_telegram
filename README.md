@@ -9,9 +9,9 @@ The library represent a simple [Telegram Bot API](https://core.telegram.org/bots
 
 For using the library you have to provide the internet connection for your IOT device by using the [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the cellular connection using [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
 
-The library supports Telegram Bot API update types: [Message](https://core.telegram.org/bots/api#message), [CallbackQuery](https://core.telegram.org/bots/api#callbackquery).
+The library supports Telegram Bot API updates: [Message](https://core.telegram.org/bots/api#message), [CallbackQuery](https://core.telegram.org/bots/api#callbackquery).
 
-The library supports Telegram Bot API request methods: [sendMessage](https://core.telegram.org/bots/api#sendmessage), [editMessageText](https://core.telegram.org/bots/api#editmessagetext), [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).
+The library supports Telegram Bot API requests: [sendMessage](https://core.telegram.org/bots/api#sendmessage), [editMessageText](https://core.telegram.org/bots/api#editmessagetext), [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).
 
 Any issues or suggestions are welcomed! )))
 
