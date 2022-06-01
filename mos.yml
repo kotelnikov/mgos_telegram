@@ -1,7 +1,7 @@
 author: Aleksey Kotelnikov <kotelnikov.www@gmail.com>
 type: lib
-description: Simple Telegram Bot API library for Mongoose OS
-version: 1.0
+description: Telegram Bot API library for Mongoose OS
+version: 2.0
 
 includes:
   - include
@@ -17,15 +17,15 @@ libs:
   - origin: https://github.com/mongoose-os-libs/ca-bundle
 
 config_schema:
-  - ["telegram",                 "o",                             {title: "Telegram Bot settings object"}]
-  - ["telegram.enable",          "b", false,                      {title: "Telegram Bot enable flag"}]
-  - ["telegram.server",          "s", "https://api.telegram.org", {title: "Telegram Bot server"}]
-  - ["telegram.token",           "s", "",                         {title: "Telegram Bot token"}]
-  - ["telegram.timeout",         "i", 30,                         {title: "Telegram Bot getUpdate timeout"}]
-  - ["telegram.rx_queue_len",    "i", 3,                          {title: "Telegram Bot RX queue"}]
-  - ["telegram.tx_queue_len",    "i", 3,                          {title: "Telegram Bot TX queue"}]
-  - ["telegram.acl",             "s", "",                         {title: "Telegram Bot access list (as JSON contains array of chat id's)"}]
-  - ["telegram.echo_bot",        "b", true,                       {title: "Telegram Bot EchoBot enable for testing"}]
+  - ["telegram",                   "o",                             {title: "Telegram Bot settings object"}]
+  - ["telegram.enable",            "b", false,                      {title: "Telegram Bot enable flag"}]
+  - ["telegram.server",            "s", "https://api.telegram.org", {title: "Telegram Bot server"}]
+  - ["telegram.token",             "s", "",                         {title: "Telegram Bot token"}]
+  - ["telegram.timeout",           "i", 30,                         {title: "Telegram Bot getUpdate timeout"}]
+  - ["telegram.update_queue_len",  "i", 3,                          {title: "Telegram Bot RX queue"}]
+  - ["telegram.request_queue_len", "i", 3,                          {title: "Telegram Bot TX queue"}]
+  - ["telegram.acl",               "s", "",                         {title: "Telegram Bot access list (as JSON contains array of chat id's)"}]
+  - ["telegram.echo_bot",          "b", true,                       {title: "Telegram Bot EchoBot enable for testing"}]
 
 tags:
   - telegram
