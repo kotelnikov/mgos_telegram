@@ -71,7 +71,7 @@ Event.addHandler(TGB.CONNECTED, app_start_handler, null);
 TGB.subscribe(data, callback, userdata);
 
 // Сигнатура функции обработчика данных telegram
-// function(ev_data, userdata) { /* Выполнение каких-либо действий */ }
+// function(ev_data, userdata) { /* Выполняем какие-либо действия здесь */ }
 
 // Пример подписки на все команды сразу
 TGB.subscribe('*', app_updates_handler, null);

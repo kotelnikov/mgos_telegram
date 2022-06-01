@@ -15,6 +15,8 @@ The library supports Telegram Bot API requests: [sendMessage](https://core.teleg
 
 Any issues or suggestions are welcomed! )))
 
+If you have some questions about Mongoose OS or you just interested in, welcome to the telegram group!
+
 ## Configuration
 
 Firstly include the library to your application by adding the following to your `mos.yml` file in section `libs`:
@@ -48,7 +50,7 @@ Property | Type | Description
 
 ## Event.addHandler()
 
-Before we can recieve updates and make requests to/from Telegram Bot API, we have to wait when the library successfully connects to the Telegram Bot API server. For this purpose add handler for `TGB.CONNECTED` event. The handler usually contains subscribing functions to the text commands or/and callback queries. `Events` it is a Core functionality of the Mongoose OS, you can find additional information here: [Event](https://mongoose-os.com/docs/mongoose-os/api/core/mgos_event.h.md).
+Before we can receive updates and make requests to/from Telegram Bot API, we have to wait when the library successfully connects to the Telegram Bot API server. For this purpose add handler for `TGB.CONNECTED` event. The handler usually contains subscribing functions to the text commands or/and callback queries. `Events` it is a Core functionality of the Mongoose OS, you can find additional information here: [Event](https://mongoose-os.com/docs/mongoose-os/api/core/mgos_event.h.md).
 
 ```js
 Event.addHandler(ev, callback, userdata);
@@ -97,7 +99,6 @@ let response_handler = function(ed, ud) {
     let resp = TGB.parse_response(ed);
     // Print to console parsed data
     print(JSON.stringify(resp));
-    // Do some other stuff with response data
 };
 
 // JS object with keys according to the native API
@@ -164,7 +165,6 @@ let response_handler = function(ed, ud) {
     let resp = TGB.parse_response(ed);
     // Print to console parsed data
     print(JSON.stringify(resp));
-    // Do some other stuff with response data
 };
 
 // JS object with keys for sendMessage method, according to the native API
@@ -179,7 +179,7 @@ TGB.custom_cb('sendMessage', js_odj, response_handler, null);
 
 ## TGB.parse_update(), TGB.parse_response()
 
-This methods for parse update and response data from Telegram Bot API. Before we can work with receiving data we have to parse it to JS object. This function returns the JS object&
+Use this methods for parsing update and response data from Telegram Bot API. Before we can work with receiving data we have to parse it to JS object. This methods returns JS object.
 
 ```js
 TGB.parse_update(ed);
@@ -191,7 +191,6 @@ let update_handler = function(ed, ud) {
     let upd = TGB.parse_update(ed);
     // Print to console parsed data
     print(JSON.stringify(upd));
-    // Do some other stuff with response data
 };
 
 // Response callback example
@@ -200,7 +199,6 @@ let response_handler = function(ed, ud) {
     let resp = TGB.parse_response(ed);
     // Print to console parsed data
     print(JSON.stringify(resp));
-    // Do some other stuff with response data
 };
 
 // Update in case of an error
@@ -422,7 +420,6 @@ typedef void (*mgos_event_handler_t)(int ev, void *ev_data, void *userdata);
 void subscription_callback(void *ev_data, void *userdata) {
   // Subscribing for command "/start"
   mgos_telegram_subscribe("/start", app_telegram_updates_handler, NULL);
-  //Do some other stuff here
 }
 
 // Adding handler for TGB_EV_CONNECTED event
