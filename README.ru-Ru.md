@@ -768,4 +768,4 @@ enum mgos_app_init_result mgos_app_init(void) {
 ```
 Демонстрация работы примера с панелью управления:
 
-<img src="https://github.com/kotelnikov/mgos_telegram/blob/main/control_panel.gif" height="500"/>
+<img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>
