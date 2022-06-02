@@ -15,6 +15,10 @@
 
 Любые замечания и рекомендации приветствуются! )))
 
+Демонстрация работы:
+
+<img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>
+
 ## Конфигурация
 
 В первую очередь необходимо добавить библиотеку в проект, для этого требуется добавить в секцию `libs` в файле `mos.yml` следующий код:
@@ -766,6 +770,3 @@ enum mgos_app_init_result mgos_app_init(void) {
   return MGOS_APP_INIT_SUCCESS;
 };
 ```
-Демонстрация работы примера с панелью управления:
-
-<img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>

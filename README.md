@@ -17,6 +17,10 @@ Any issues or suggestions are welcomed! )))
 
 If you have some questions about Mongoose OS or you just interested in, welcome to the telegram group!
 
+Demonstration example:
+
+<img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>
+
 ## Configuration
 
 Firstly include the library to your application by adding the following to your `mos.yml` file in section `libs`:
@@ -750,7 +754,3 @@ enum mgos_app_init_result mgos_app_init(void) {
   return MGOS_APP_INIT_SUCCESS;
 };
 ```
-
-Example 2 demonstration:
-
-<img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>
