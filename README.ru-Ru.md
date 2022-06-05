@@ -15,7 +15,7 @@
 
 Любые замечания и рекомендации приветствуются! )))
 
-Демонстрация работы:
+### Демонстрация работы:
 
 <img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>
 
@@ -171,7 +171,7 @@ TGB.custom_cb(method, js_obj, cb, ud);
 let response_handler = function(ed, ud) {
     // Парсинг ответа
     let resp = TGB.parse_response(ed);
-    // Вывод в терминал данных
+    // Вывод в терминал данных ответа
     print(JSON.stringify(resp));
 };
 
@@ -208,7 +208,7 @@ let response_handler = function(ed, ud) {
     print(JSON.stringify(resp));
 };
 
-// Пример обновления при поступлении входящего Сообщения
+// Пример входящего обновления при поступлении входящего Сообщения
 {
   update_id: 532671789,
   type:1, // 1 -> СООБЩЕНИЕ

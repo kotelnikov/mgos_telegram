@@ -15,9 +15,7 @@ The library supports Telegram Bot API requests: [sendMessage](https://core.teleg
 
 Any issues or suggestions are welcomed! )))
 
-If you have some questions about Mongoose OS or you just interested in, welcome to the telegram group!
-
-Demonstration example:
+### Demonstration example:
 
 <img src="https://github.com/kotelnikov/mgos_telegram/blob/master/control_panel.gif" height="500"/>
 
@@ -99,9 +97,9 @@ TGB.send_js_cb(js_obj, cb, ud);
 
 // Response callback example
 let response_handler = function(ed, ud) {
-    // Parse update from telegram
+    // Parse response data
     let resp = TGB.parse_response(ed);
-    // Print to console parsed data
+    // Print to console parsed response data
     print(JSON.stringify(resp));
 };
 
@@ -165,9 +163,9 @@ TGB.custom_cb(method, js_obj, cb, ud);
 
 // Response callback example
 let response_handler = function(ed, ud) {
-    // Parse update from telegram
+    // Parse response data
     let resp = TGB.parse_response(ed);
-    // Print to console parsed data
+    // Print to console parsed response data
     print(JSON.stringify(resp));
 };
 
@@ -191,28 +189,28 @@ TGB.parse_response(ed);
 
 // Update callback example
 let update_handler = function(ed, ud) {
-    // Parse update from telegram
+    // Parse update data
     let upd = TGB.parse_update(ed);
-    // Print to console parsed data
+    // Print to console parsed update data
     print(JSON.stringify(upd));
 };
 
 // Response callback example
 let response_handler = function(ed, ud) {
-    // Parse update from telegram
+    // Parse response data
     let resp = TGB.parse_response(ed);
-    // Print to console parsed data
+    // Print to console parsed response data
     print(JSON.stringify(resp));
 };
 
-// Update in case of an error
+// Update data example in case of an Error
 {
   ok: false, 
   error_code: 420, 
   description: 'Flood'
 }
 
-// Update example in case of Message
+// Update data example in case of Message
 {
   update_id: 532671789,
   type:1, // 1 -> MESSAGE
@@ -222,7 +220,7 @@ let response_handler = function(ed, ud) {
   chat_id: -444555666 // If negative it is a group chat
 }
 
-// Update example in case of Callback query
+// Update data example in case of Callback query
 {
   update_id: 532671790,
   type:2, // 2 -> CALLBACK QUERY
@@ -233,21 +231,21 @@ let response_handler = function(ed, ud) {
   chat_id: -444555666 // If negative it is a group chat
 }
 
-// Response in case of an error
+// Response data example in case of an Error
 {
   ok: false, 
   error_code: 420, 
   description: 'Flood'
 }
 
-// Response in case of sendMessage
+// Response data example in case of response to sendMessage
 {
   ok: true, 
   message_id: 1464, 
   chat_id: -444555666 // If negative it is a group chat
 }
 
-// Response in case of other methods
+// Response data example in case of all other methods
 {
   ok: true
 }
@@ -261,31 +259,30 @@ let response_handler = function(ed, ud) {
 load("api_events.js");
 load('api_telegram.js');
 
-// Handler for managing updates from telegram
+// Handler for managing updates
 let updates_handler = function(ed, ud) {
-    // Parse update from telegram
+    // Parse update data
     let upd = TGB.parse_update(ed);
-    // Print to console parsed data
+    // Print to console parsed update data
     print(JSON.stringify(upd));
-    // Handling the '/start' text command
+    // Handling the '/start' command
     if (upd.data === '/start') {
         print('Telegram: mJS "/start" handler');
         TGB.send(upd.chat_id, 'Received command "/start"');
     }
-    // Handling the '/status' text command
+    // Handling the '/status' command
     else if (upd.data === '/status') {
         print('Telegram: mJS "/status" handler');
         TGB.send(upd.chat_id, 'Received command "/status"');
     }
-    // Handling all other text commands
-    // In case we subscribed for all commands
+    // Handling all other commands in case we subscribed for all
     else {
         print('Telegram: mJS "*" handler');
         TGB.send(upd.chat_id, upd.data);
     }
 };
 
-// This is the app start handler
+// Handler for make subscriptions
 let app_start_handler = function(ev, ed, ud) {
     // Subscribe to all received data by one subscription "*"
     TGB.subscribe('*', updates_handler, null);
@@ -343,9 +340,9 @@ let control_panel = {
 let updates_handler = function(ed, ud) {
     // Parse update
     let upd = TGB.parse_update(ed);
-    // Print to console parsed data
+    // Print to console parsed update data
     print(JSON.stringify(upd));
-    // Handle the '/start' command
+    // Handle the '/menu' command
     if (upd.data === '/menu') {
 	    // Check the existence of the control panel in the chat
         for (let i = 0; i < control_panel.all_panels.length; i++) {
@@ -381,9 +378,9 @@ let updates_handler = function(ed, ud) {
 
 // Telegram response handler
 let response_handler = function(ed, ud) {
-    // Parse response instance
+    // Parse response data
     let resp = TGB.parse_response(ed);
-    // Print to console parsed data
+    // Print to console parsed response data
     print(JSON.stringify(resp));
     // Search the control panel already exist in the that
     for (let i = 0; i < control_panel.all_panels.length; i++) {
@@ -396,7 +393,7 @@ let response_handler = function(ed, ud) {
 
 // Telegram subscribing handler
 let app_start_handler = function(ev, ed, ud) {
-    // Subscribe for text command '/start'
+    // Subscribe for text command '/menu'
     TGB.subscribe('/menu', updates_handler, null);
     // Subscription for text command and callback query is the same
     // Subscribe for callback query
