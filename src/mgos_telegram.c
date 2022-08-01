@@ -181,7 +181,7 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
   switch (update->type) {
     case MESSAGE:
       LOG(LL_INFO, ("TELEGRAM: New message in chat: %lld, from user: %lld, text: %s", 
-        (long long)update->chat_id, (unsigned long long)update->user_id, update->data));
+        update->chat_id, update->user_id, update->data));
       //Check echo bot mode
       if (tg->cfg->echo_bot) {
         LOG(LL_INFO, ("TELEGRAM: Echo bot mode enabled"));
@@ -202,7 +202,7 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
       break;
     case CALLBACK_QUERY:
       LOG(LL_INFO, ("TELEGRAM: New callback query id: %s, in chat: %lld, from user: %lld, data: %s", 
-        update->query_id, (long long)update->chat_id, (unsigned long long)update->user_id, update->data));
+        update->query_id, update->chat_id, update->user_id, update->data));
       //Check permissions for user_id in access list
       if (!mgos_telegram_check_user_access(update->user_id)) break;
       //Search for subscription
