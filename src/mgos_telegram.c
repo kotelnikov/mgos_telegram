@@ -75,7 +75,7 @@ static void mgos_telegram_response_free(struct mgos_telegram_response *response)
 static bool mgos_telegram_is_request_queue_overflow();
 static bool mgos_telegram_is_update_queue_overflow();
 static bool mgos_telegram_request_queue_add(struct mgos_telegram_request *request);
-static bool mgos_telegram_check_user_access(uint32_t user_id);
+static bool mgos_telegram_check_user_access(int64_t user_id);
 struct mgos_telegram_subscription *mgos_telegram_subscription_search(const char *data);
 
 static uint32_t mgos_telegram_parse_update(void *source, void *dest);
@@ -180,8 +180,8 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
 
   switch (update->type) {
     case MESSAGE:
-      LOG(LL_INFO, ("TELEGRAM: New message in chat: %li, from user: %lu, text: %s", 
-        (long)update->chat_id, (unsigned long)update->user_id, update->data));
+      LOG(LL_INFO, ("TELEGRAM: New message in chat: %lld, from user: %lld, text: %s", 
+        (long long)update->chat_id, (unsigned long long)update->user_id, update->data));
       //Check echo bot mode
       if (tg->cfg->echo_bot) {
         LOG(LL_INFO, ("TELEGRAM: Echo bot mode enabled"));
@@ -201,8 +201,8 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
       else LOG(LL_INFO, ("TELEGRAM: Subscription \"%s\" not found, ignore update", update->data));
       break;
     case CALLBACK_QUERY:
-      LOG(LL_INFO, ("TELEGRAM: New callback query id: %s, in chat: %li, from user: %lu, data: %s", 
-        update->query_id, (long)update->chat_id, (unsigned long)update->user_id, update->data));
+      LOG(LL_INFO, ("TELEGRAM: New callback query id: %s, in chat: %lld, from user: %lld, data: %s", 
+        update->query_id, (long long)update->chat_id, (unsigned long long)update->user_id, update->data));
       //Check permissions for user_id in access list
       if (!mgos_telegram_check_user_access(update->user_id)) break;
       //Search for subscription
@@ -322,7 +322,7 @@ static bool mgos_telegram_request_queue_add(struct mgos_telegram_request *reques
 
 
 // TELEGRAM SERVICE FN
-static bool mgos_telegram_check_user_access(uint32_t user_id) {
+static bool mgos_telegram_check_user_access(int64_t user_id) {
   LOG(LL_DEBUG, ("TELEGRAM: mgos_telegram_check_user_access()"));
   bool allowed = false;
 
@@ -332,18 +332,18 @@ static bool mgos_telegram_check_user_access(uint32_t user_id) {
   }
   
   struct json_token t;
-  int32_t acl_el;
+  int64_t acl_el;
 
   for (int i = 0; json_scanf_array_elem(tg->cfg->acl, strlen(tg->cfg->acl), "", i, &t) > 0; i++) {
-    json_scanf(t.ptr, t.len, "%d", &acl_el);
+    json_scanf(t.ptr, t.len, "%lld", &acl_el);
     if (acl_el != 0 && acl_el == user_id) {
       allowed = true;
       break;
     }
   }
   
-  if (allowed) LOG(LL_INFO, ("TELEGRAM: Access allowed for user_id: %lu, accept update", (unsigned long)user_id));
-  else LOG(LL_INFO, ("TELEGRAM: Access denied for user_id: %lu, ignore update", (unsigned long)user_id));
+  if (allowed) LOG(LL_INFO, ("TELEGRAM: Access allowed for user_id: %lld, accept update", user_id));
+  else LOG(LL_INFO, ("TELEGRAM: Access denied for user_id: %lld, ignore update", user_id));
 
   return allowed;
 }
@@ -382,15 +382,15 @@ static uint32_t mgos_telegram_parse_update(void *source, void *dest) {
 
   switch (update->type) {
     case MESSAGE: {
-      json_scanf(t.ptr, t.len, "{message: {chat: {id: %d}}}", &update->chat_id);
-      json_scanf(t.ptr, t.len, "{message: {from: {id: %d}}}", &update->user_id);
+      json_scanf(t.ptr, t.len, "{message: {chat: {id: %lld}}}", &update->chat_id);
+      json_scanf(t.ptr, t.len, "{message: {from: {id: %lld}}}", &update->user_id);
       json_scanf(t.ptr, t.len, "{message: {text: %Q}}", &update->data);
       if (update->data == NULL) mg_asprintf(&update->data, 0, "Unsupported characters");
       break;      
     }
     case CALLBACK_QUERY: {
-      json_scanf(t.ptr, t.len, "{callback_query: {from: {id: %d}}}", &update->user_id);
-      json_scanf(t.ptr, t.len, "{callback_query: {message: {chat: {id: %d}}}}", &update->chat_id);
+      json_scanf(t.ptr, t.len, "{callback_query: {from: {id: %lld}}}", &update->user_id);
+      json_scanf(t.ptr, t.len, "{callback_query: {message: {chat: {id: %lld}}}}", &update->chat_id);
       json_scanf(t.ptr, t.len, "{callback_query: {message: {message_id: %d}}}", &update->message_id);
       json_scanf(t.ptr, t.len, "{callback_query: {data: %Q}}", &update->data);
       if (update->data == NULL) mg_asprintf(&update->data, 0, "Unsupported characters");
@@ -422,7 +422,7 @@ static void mgos_telegram_parse_response(void *source, void *dest) {
     case EDIT_MESSAGE_TEXT:
     case CUSTOM_METHOD:
       json_scanf(hm->body.p, hm->body.len, "{result: {message_id: %d} }", &request->response->message_id);
-      json_scanf(hm->body.p, hm->body.len, "{result: {chat: {id: %d}}}", &request->response->chat_id);
+      json_scanf(hm->body.p, hm->body.len, "{result: {chat: {id: %lld}}}", &request->response->chat_id);
       break;
     default:
       break;
@@ -608,7 +608,7 @@ void mgos_telegram_subscribe(const char *data, mgos_telegram_cb_t callback, void
 }
 
 
-void mgos_telegram_send_message_with_callback(int32_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata) {  
+void mgos_telegram_send_message_with_callback(int64_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata) {  
   LOG(LL_DEBUG, ("TELEGRAM: mgos_telegram_send_message_with_callback()"));
   if (!tg) return;
 
@@ -616,7 +616,7 @@ void mgos_telegram_send_message_with_callback(int32_t chat_id, const char *text,
   request->method = SEND_MESSAGE;
   request->callback = callback;
   request->userdata = userdata;
-  request->json = json_asprintf("{chat_id: %d, text: %Q}", chat_id, text);
+  request->json = json_asprintf("{chat_id: %lld, text: %Q}", chat_id, text);
   
   LOG(LL_DEBUG, ("TELEGRAM: Send message ->> %s", request->json));
   bool result = mgos_telegram_request_queue_add(request);
@@ -626,7 +626,7 @@ void mgos_telegram_send_message_with_callback(int32_t chat_id, const char *text,
   }
 }
 
-void mgos_telegram_send_message(int32_t chat_id, const char *text){
+void mgos_telegram_send_message(int64_t chat_id, const char *text) {
   LOG(LL_DEBUG, ("TELEGRAM: mgos_telegram_send_message()"));
   mgos_telegram_send_message_with_callback(chat_id, text, NULL, NULL);
 }
@@ -655,13 +655,13 @@ void mgos_telegram_send_message_json(const char *json){
 }
 
 
-void mgos_telegram_edit_message_text(int32_t chat_id, int32_t message_id, const char *text) {  
+void mgos_telegram_edit_message_text(int64_t chat_id, int32_t message_id, const char *text) {  
   LOG(LL_DEBUG, ("TELEGRAM: mgos_telegram_edit_message_text()"));
   if (!tg) return;
 
   struct mgos_telegram_request *request = mgos_telegram_request_new();
   request->method = EDIT_MESSAGE_TEXT;
-  request->json = json_asprintf("{chat_id: %d, message_id: %d, text: %Q}", chat_id, message_id, text);
+  request->json = json_asprintf("{chat_id: %lld, message_id: %d, text: %Q}", chat_id, message_id, text);
   
   LOG(LL_DEBUG, ("TELEGRAM: Edit message text ->> %s", request->json));
   bool result = mgos_telegram_request_queue_add(request);

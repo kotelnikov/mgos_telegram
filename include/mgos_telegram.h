@@ -47,16 +47,17 @@ struct mgos_telegram_response {
   int error_code;
   char *description;
   int message_id;
-  int chat_id;
+  //int chat_id;
+  int64_t chat_id;
   enum mgos_telegram_request_method method;
 };
 
 struct mgos_telegram_update {
   enum mgos_telegram_update_type type;
-  uint32_t update_id;
-  uint32_t message_id;
-  uint32_t user_id;
-  int32_t chat_id;
+  int32_t update_id;
+  int32_t message_id;
+  int64_t user_id;
+  int64_t chat_id;
   char *data;
   char *query_id;
   STAILQ_ENTRY(mgos_telegram_update) next;
@@ -65,13 +66,13 @@ struct mgos_telegram_update {
 typedef void (*mgos_telegram_cb_t)(void *ev_data MG_UD_ARG(void *userdata));
 void mgos_telegram_subscribe(const char *data, mgos_telegram_cb_t callback, void *userdata);
 
-void mgos_telegram_send_message(int32_t chat_id, const char *text);
+void mgos_telegram_send_message(int64_t chat_id, const char *text);
 void mgos_telegram_send_message_json(const char *json);
 
-void mgos_telegram_send_message_with_callback(int32_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata);
+void mgos_telegram_send_message_with_callback(int64_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata);
 void mgos_telegram_send_message_json_with_callback(const char *json, mgos_telegram_cb_t callback, void *userdata);
 
-void mgos_telegram_edit_message_text(int32_t chat_id, int32_t message_id, const char *text);
+void mgos_telegram_edit_message_text(int64_t chat_id, int32_t message_id, const char *text);
 void mgos_telegram_edit_message_text_json(const char *json);
 
 void mgos_telegram_answer_callback_query(const char *id, const char *text, bool alert);
