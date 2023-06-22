@@ -13,7 +13,9 @@
 
 Библиотека поддерживает указанные запросы: [sendMessage](https://core.telegram.org/bots/api#sendmessage), [editMessageText](https://core.telegram.org/bots/api#editmessagetext), [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).
 
-Любые замечания и рекомендации приветствуются! )))
+Любые замечания и рекомендации приветствуются!
+
+Если эта библиотека пригодилась для вашего проекта, пожалуйста поставьте этому репозиторию звезду! ⭐⭐⭐
 
 ### Демонстрация работы:
 

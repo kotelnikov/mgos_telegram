@@ -13,7 +13,9 @@ The library supports Telegram Bot API updates: [Message](https://core.telegram.o
 
 The library supports Telegram Bot API requests: [sendMessage](https://core.telegram.org/bots/api#sendmessage), [editMessageText](https://core.telegram.org/bots/api#editmessagetext), [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).
 
-Any issues or suggestions are welcomed! )))
+Any issues or suggestions are welcomed!!!
+
+If you found this library useful for your Mongoose OS project, please give this repository a star! ⭐⭐⭐
 
 ### Demonstration example:
 
