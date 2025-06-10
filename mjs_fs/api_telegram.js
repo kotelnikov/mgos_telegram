@@ -1,5 +1,5 @@
 /*
- * 2022 Aleksey A. Kotelnikov <kotelnikov.www@gmail.com>
+ * 2025 Aleksey A. Kotelnikov <kotelnikov.www@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the ""License"");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,9 @@ let TGB = {
     return r;
   },
   // EVENTS
-  DISCONNECTED: tgb_bn,
-  CONNECTED: tgb_bn + 1,
+  DISCONNECTED: tgb_bn + 0,
+  CONNECTED:    tgb_bn + 1,
+  RECONNECTED:  tgb_bn + 2,
   // UPDATES  
   MESSAGE: 1,
   CALLBACK_QUERY: 2

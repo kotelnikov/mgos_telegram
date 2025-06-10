@@ -5,17 +5,20 @@
 
 ## Краткое описание
 
-Библиотека предназначена для простого взаимодействия с [Telegram Bot API](https://core.telegram.org/bots) с использованием фреймворка [Mongoose OS](https://mongoose-os.com/), разработанного [Cesanta Software Ltd](https://cesanta.com/). Библиотека подойдет для приложений, где требуется управлять устройствами интернета вещей, путем обмена сообщениями через мессенджер Telegram. Библиотека будет работать на микроконтроллерах ESP8266 и ESP32 от [Espressif Systems](https://www.espressif.com/).
+Библиотека предназначена для простого взаимодействия с [Telegram Bot API](https://core.telegram.org/bots) с использованием фреймворка [Mongoose OS](https://mongoose-os.com/), разработанного [Cesanta Software Ltd](https://cesanta.com/). Библиотека подойдет для приложений, где требуется управлять устройствами интернета вещей, путем обмена сообщениями через мессенджер Telegram. Библиотека протестирована на микроконтроллерах ESP8266 и ESP32 от [Espressif Systems](https://www.espressif.com/). Любые замечания и рекомендации приветствуются!
 
-Для функционирования библиотеки в вашем проекте должно быть настроено подключение к интернет через [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) или через GSM модем [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
+Для функционирования библиотеки в вашем проекте должно быть настроено подключение к интернет через [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md), через GSM модем [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md) или через проводное подключение [Ethernet](https://mongoose-os.com/docs/mongoose-os/api/net/ethernet.md).
 
-Библиотека поддерживает указанные обновления: [Message](https://core.telegram.org/bots/api#message), [CallbackQuery](https://core.telegram.org/bots/api#callbackquery)
+Библиотека поддерживает указанные обновления: 
+  - [Message](https://core.telegram.org/bots/api#message)
+  - [CallbackQuery](https://core.telegram.org/bots/api#callbackquery)
 
-Библиотека поддерживает указанные запросы: [sendMessage](https://core.telegram.org/bots/api#sendmessage), [editMessageText](https://core.telegram.org/bots/api#editmessagetext), [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).
+Библиотека поддерживает указанные запросы: 
+  - [sendMessage](https://core.telegram.org/bots/api#sendmessage)
+  - [editMessageText](https://core.telegram.org/bots/api#editmessagetext)
+  - [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery)
 
-Любые замечания и рекомендации приветствуются!
-
-Если эта библиотека пригодилась для вашего проекта, пожалуйста поставьте этому репозиторию звезду! ⭐⭐⭐
+Если вы нашли полезной данную библиотеку для вашего проекта, пожалуйста поставьте этому репозиторию звезду! ⭐
 
 ### Демонстрация работы:
 
@@ -23,7 +26,7 @@
 
 ## Конфигурация
 
-В первую очередь необходимо добавить библиотеку в проект, для этого требуется добавить в секцию `libs` в файле `mos.yml` следующий код:
+Необходимо добавить библиотеку в проект, для этого требуется добавить в секцию `libs` в файле `mos.yml` следующий код:
 
 ```yaml
 libs:
@@ -60,13 +63,13 @@ Event.addHandler(ev, callback, userdata);
 // function(ev, evdata, userdata) { /* Выполняем какие-либо действия здесь */ }
 
 // Обработчик события TGB.CONNECTED, в котором осуществляется подписка на команды
-let app_start_handler = function(ev, ed, ud) {
+let tgb_connect_handler = function(ev, ed, ud) {
 	// Подписка на команду '/start'
     TGB.subscribe('/start', updates_handler, null);
 };
 
 // Добавляем обработчик события TGB.CONNECTED
-Event.addHandler(TGB.CONNECTED, app_start_handler, null);
+Event.addHandler(TGB.CONNECTED, tgb_connect_handler, null);
 ```
 
 ## TGB.subscribe()

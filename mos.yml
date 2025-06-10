@@ -1,7 +1,7 @@
 author: Aleksey Kotelnikov <kotelnikov.www@gmail.com>
 type: lib
 description: Telegram Bot API library for Mongoose OS
-version: 2.0
+version: 2.1
 
 includes:
   - include

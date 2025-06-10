@@ -5,17 +5,20 @@
 
 ## Overview
 
-The library represent a simple [Telegram Bot API](https://core.telegram.org/bots) for [Mongoose OS](https://mongoose-os.com/) - IOT framework developed by [Cesanta Software Ltd](https://cesanta.com/). The library will be useful applications where you have to control and manage IOT devices by exchanging messages through the Telegram. The library successfully tested on ESP8266/ESP32 from [Espressif Systems](https://www.espressif.com/).
+This library represents a simple [Telegram Bot API](https://core.telegram.org/bots) for [Mongoose OS](https://mongoose-os.com/) - IOT framework developed by [Cesanta Software Ltd](https://cesanta.com/). The library could be useful for applications for control and manage IOT devices through the Telegram Bot API. The library successfully tested on ESP8266/ESP32 from [Espressif Systems](https://www.espressif.com/). Any issues or suggestions are welcomed!
 
-For using the library you have to provide the internet connection for your IOT device by using the [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md) or by using the cellular connection using [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md).
+For using the library you have to provide the internet connection for your IOT device by using the [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md), by using the cellular connection using [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md) or [Ethernet](https://mongoose-os.com/docs/mongoose-os/api/net/ethernet.md).
 
-The library supports Telegram Bot API updates: [Message](https://core.telegram.org/bots/api#message), [CallbackQuery](https://core.telegram.org/bots/api#callbackquery).
+The library supports Telegram Bot API updates: 
+  - [Message](https://core.telegram.org/bots/api#message) 
+  - [CallbackQuery](https://core.telegram.org/bots/api#callbackquery)
 
-The library supports Telegram Bot API requests: [sendMessage](https://core.telegram.org/bots/api#sendmessage), [editMessageText](https://core.telegram.org/bots/api#editmessagetext), [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).
+The library supports Telegram Bot API requests: 
+  - [sendMessage](https://core.telegram.org/bots/api#sendmessage)
+  - [editMessageText](https://core.telegram.org/bots/api#editmessagetext)
+  - [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery)
 
-Any issues or suggestions are welcomed!!!
-
-If you found this library useful for your Mongoose OS project, please give this repository a star! ⭐⭐⭐
+If you found this library useful for your project, please give a star for repository! ⭐
 
 ### Demonstration example:
 
@@ -54,7 +57,7 @@ Property | Type | Description
 
 ## Event.addHandler()
 
-Before we can receive updates and make requests to/from Telegram Bot API, we have to wait when the library successfully connects to the Telegram Bot API server. For this purpose add handler for `TGB.CONNECTED` event. The handler usually contains subscribing functions to the text commands or/and callback queries. `Events` it is a Core functionality of the Mongoose OS, you can find additional information here: [Event](https://mongoose-os.com/docs/mongoose-os/api/core/mgos_event.h.md).
+Before we can receive an update or make requests to/from Telegram Bot API, we have to wait when the library successfully connects to the Telegram Bot API server. For this purpose add handler for `TGB.CONNECTED` event. The event handler usually contains subscribing functions for text commands and callback queries. `Events` it is a Core functionality of the Mongoose OS, you can find additional information here: [Event](https://mongoose-os.com/docs/mongoose-os/api/core/mgos_event.h.md).
 
 ```js
 Event.addHandler(ev, callback, userdata);
@@ -62,13 +65,14 @@ Event.addHandler(ev, callback, userdata);
 // Callback should look like:
 // function(ev, evdata, userdata) { /* Do some stuff here */ }
 
-// Subscribe handler
-let app_start_handler = function(ev, ed, ud) {
-    TGB.subscribe('/start', updates_handler, null);
+// Connection handler
+let tgb_connect_handler = function(ev, ed, ud) {
+  print("Connected to Telegram API");
+  TGB.subscribe('/start', updates_handler, null);
 };
 
 // Add handler for TGB.CONNECTED event
-Event.addHandler(TGB.CONNECTED, app_start_handler, null);
+Event.addHandler(TGB.CONNECTED, tgb_connect_handler, null);
 ```
 
 ## TGB.subscribe()
@@ -119,7 +123,7 @@ TGB.send_js_cb(js_odj, response_handler, null);
 
 ## TGB.update(), TGB.update_js()
 
-Use this methods to update certain messages. You can send the update as simple text message or you can also update message by using native Telegram bot API for [editMessageText](https://core.telegram.org/bots/api#editmessagetext) method.
+Use these methods to update certain messages. You can send the update as simple text message, or you can also update message by using native Telegram bot API for [editMessageText](https://core.telegram.org/bots/api#editmessagetext) method.
 
 ```js
 TGB.update(chat_id, message_id, text);
@@ -138,7 +142,7 @@ TGB.update_js(js_odj);
 
 ## TGB.answer(), TGB.answer_js()
 
-Use this methods to send answers to callback queries sent from inline keyboards. The answer will be displayed to the user as a notification at the top of the chat screen or as an alert. You can send the simple text answer or you can use the native Telegram bot API for [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery) method.
+Use these methods to send answers to callback queries sent from inline keyboards. The answer will be displayed to the user as a notification at the top of the chat screen or as an alert. You can send the simple text answer, or you can use the native Telegram bot API for [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery) method.
 
 ```js
 TGB.answer(id, text, alert);
@@ -157,7 +161,7 @@ TGB.answer_js(js_odj);
 
 ## TGB.custom(), TGB.custom_cb()
 
-Use this methods to execute the custom Telegram Bot API method according to the [API](https://core.telegram.org/bots/api#available-methods).
+Use these methods to execute the custom Telegram Bot API method according to the [API](https://core.telegram.org/bots/api#available-methods).
 
 ```js
 TGB.custom(method, js_obj);
@@ -183,7 +187,7 @@ TGB.custom_cb('sendMessage', js_odj, response_handler, null);
 
 ## TGB.parse_update(), TGB.parse_response()
 
-Use this methods for parsing update and response data from Telegram Bot API. Before we can work with receiving data we have to parse it to JS object. This methods returns JS object.
+Use these methods for parsing update and response data from Telegram Bot API. Before we can work with receiving data we have to parse it to JS object. These methods return JS object.
 
 ```js
 TGB.parse_update(ed);
@@ -297,7 +301,7 @@ let app_start_handler = function(ev, ed, ud) {
 Event.addHandler(TGB.CONNECTED, app_start_handler, null);
 ```
 
-#### Example 2. Multi user control panel with inline control buttons and state updates.
+#### Example 2. Multi-user control panel with inline control buttons and state updates.
 
 ```js
 load('api_sys.js');
