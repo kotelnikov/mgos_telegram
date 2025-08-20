@@ -397,7 +397,7 @@ static void mgos_telegram_parse_update(void *source, void *dest, uint32_t *updat
         json_scanf(t.ptr, t.len, "{message: {chat: {id: %lld}}}", &update->chat_id);
         json_scanf(t.ptr, t.len, "{message: {from: {id: %llu}}}", &update->user_id);
         json_scanf(t.ptr, t.len, "{message: {text: %Q}}", &update->data);
-        if (update->data == NULL) mg_asprintf(&update->data, 0, "Unsupported characters");
+        if (update->data == NULL) mg_asprintf(&update->data, 0, "%s", "Unsupported characters");
         break;      
       }
       case CALLBACK_QUERY: {
@@ -405,7 +405,7 @@ static void mgos_telegram_parse_update(void *source, void *dest, uint32_t *updat
         json_scanf(t.ptr, t.len, "{callback_query: {message: {chat: {id: %lld}}}}", &update->chat_id);
         json_scanf(t.ptr, t.len, "{callback_query: {message: {message_id: %u}}}", &update->message_id);
         json_scanf(t.ptr, t.len, "{callback_query: {data: %Q}}", &update->data);
-        if (update->data == NULL) mg_asprintf(&update->data, 0, "Unsupported characters");
+        if (update->data == NULL) mg_asprintf(&update->data, 0, "%s", "Unsupported characters");
         break;      
       }
       default: {
@@ -459,7 +459,7 @@ static void mgos_telegram_http_poll_once() {
   char *pd = NULL;
 
   mg_asprintf(&url, 0, "%s/bot%s/getUpdates", tg->cfg->server, tg->cfg->token);
-  mg_asprintf(&eh, 0, "Content-Type: application/json\r\n");
+  mg_asprintf(&eh, 0, "%s", "Content-Type: application/json\r\n");
   pd = json_asprintf("{limit: 1, timeout: %d, offset: %d, allowed_updates: [%Q, %Q]}",
     tg->cfg->timeout > 0 ? tg->cfg->timeout : 60,
     tg->update_id > 0 ? tg->update_id + 1 : 0,
@@ -537,7 +537,7 @@ static void mgos_telegram_http_send_request(struct mgos_telegram_request *reques
   char *eh = NULL;
   char *pd = NULL;
 
-  mg_asprintf(&eh, 0, "Content-Type: application/json\r\n");
+  mg_asprintf(&eh, 0, "%s", "Content-Type: application/json\r\n");
   
   switch (request->method) {
     case GET_ME: {
@@ -546,22 +546,22 @@ static void mgos_telegram_http_send_request(struct mgos_telegram_request *reques
     }
     case SEND_MESSAGE: {
       mg_asprintf(&url, 0, "%s/bot%s/%s", tg->cfg->server, tg->cfg->token, "sendMessage");
-      mg_asprintf(&pd, 0, request->json);
+      mg_asprintf(&pd, 0, "%s", request->json);
       break;
     }
     case EDIT_MESSAGE_TEXT: {
       mg_asprintf(&url, 0, "%s/bot%s/%s", tg->cfg->server, tg->cfg->token, "editMessageText");
-      mg_asprintf(&pd, 0, request->json);
+      mg_asprintf(&pd, 0, "%s", request->json);
       break;
     }
     case ANSWER_CALLBACK_QUERY: {
       mg_asprintf(&url, 0, "%s/bot%s/%s", tg->cfg->server, tg->cfg->token, "answerCallbackQuery");
-      mg_asprintf(&pd, 0, request->json);
+      mg_asprintf(&pd, 0, "%s", request->json);
       break;
     }
     case CUSTOM_METHOD: {
       mg_asprintf(&url, 0, "%s/bot%s/%s", tg->cfg->server, tg->cfg->token, request->custom_method);
-      mg_asprintf(&pd, 0, request->json);
+      mg_asprintf(&pd, 0, "%s", request->json);
       break;
     }
     default: {
@@ -636,7 +636,7 @@ void mgos_telegram_subscribe(const char *data, mgos_telegram_cb_t callback, void
   }
   // Subscribe the command
   struct mgos_telegram_subscription *new_subscription = calloc(1, sizeof(*new_subscription));
-  mg_asprintf(&new_subscription->data, 0, data);
+  mg_asprintf(&new_subscription->data, 0, "%s", data);
   new_subscription->callback = callback;
   new_subscription->userdata = userdata;
   SLIST_INSERT_HEAD(&tg->subscriptions, new_subscription, next);
@@ -687,7 +687,7 @@ void mgos_telegram_send_message_json_with_callback(const char *json, mgos_telegr
   request->method = SEND_MESSAGE;
   request->callback = callback;
   request->userdata = userdata;
-  mg_asprintf(&request->json, 0, json);
+  mg_asprintf(&request->json, 0, "%s", json);
   
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Send message ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
@@ -731,7 +731,7 @@ void mgos_telegram_edit_message_text_json(const char *json) {
 
   struct mgos_telegram_request *request = mgos_telegram_request_alloc();
   request->method = EDIT_MESSAGE_TEXT;
-  mg_asprintf(&request->json, 0, json);
+  mg_asprintf(&request->json, 0, "%s", json);
   
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Edit message text ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
@@ -770,7 +770,7 @@ void mgos_telegram_answer_callback_query_json(const char *json) {
 
   struct mgos_telegram_request *request = mgos_telegram_request_alloc();
   request->method = ANSWER_CALLBACK_QUERY;
-  mg_asprintf(&request->json, 0, json);
+  mg_asprintf(&request->json, 0, "%s", json);
 
   LOG(LL_DEBUG, ("%s ->> %s %s", LIB_NAME, "Answer callback query ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
@@ -790,8 +790,8 @@ void mgos_telegram_execute_custom_method_with_callback(const char *method, const
 
   struct mgos_telegram_request *request = mgos_telegram_request_alloc();
   request->method = CUSTOM_METHOD;
-  mg_asprintf(&request->custom_method, 0, method);
-  mg_asprintf(&request->json, 0, json);
+  mg_asprintf(&request->custom_method, 0, "%s", method);
+  mg_asprintf(&request->json, 0, "%s", json);
   request->callback = callback;
   request->userdata = userdata;
   
