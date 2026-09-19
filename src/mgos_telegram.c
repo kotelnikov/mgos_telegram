@@ -22,6 +22,7 @@
 #include "mgos_timers.h"
 #include "mgos_telegram.h"
 
+#include "frozen.h"
 #ifdef MGOS_HAVE_MJS
 #include "mjs.h"
 #endif
@@ -300,7 +301,7 @@ static bool mgos_telegram_is_request_queue_overflow() {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
 
   bool overflow = false;
-  size_t qlen = 0;
+  int qlen = 0;
   struct mgos_telegram_request *request;
 
   STAILQ_FOREACH(request, &tg->request_queue, next) { qlen++; }
@@ -313,7 +314,7 @@ static bool mgos_telegram_is_update_queue_overflow() {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
 
   bool overflow = false;
-  size_t qlen = 0;
+  int qlen = 0;
   struct mgos_telegram_update *update;
 
   STAILQ_FOREACH(update, &tg->update_queue, next) { qlen++; }
@@ -344,7 +345,7 @@ static bool mgos_telegram_check_user_access(uint64_t user_id) {
   }
 
   struct json_token t;
-  int64_t acl_el;
+  uint64_t acl_el;
 
   for (int i = 0; json_scanf_array_elem(tg->cfg->acl, strlen(tg->cfg->acl), "", i, &t) > 0; i++) {
     json_scanf(t.ptr, t.len, "%llu", &acl_el);
