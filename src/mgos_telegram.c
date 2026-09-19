@@ -130,7 +130,7 @@ static const struct mjs_c_struct_member update_descr_other[] = {
 
 const struct mjs_c_struct_member *get_update_descr(void *ptr) {
   struct mgos_telegram_update *update = (struct mgos_telegram_update *) ptr;
-  
+
   switch (update->type) {
     case MESSAGE:
       return update_descr_message;
@@ -147,7 +147,7 @@ const struct mjs_c_struct_member *get_update_descr(void *ptr) {
 
 static const struct mjs_c_struct_member response_descr_error[] = {
   {"ok", offsetof(struct mgos_telegram_response, ok), MJS_STRUCT_FIELD_TYPE_BOOL, NULL},
-  {"error_code", offsetof(struct mgos_telegram_response, error_code), MJS_STRUCT_FIELD_TYPE_INT, NULL},  
+  {"error_code", offsetof(struct mgos_telegram_response, error_code), MJS_STRUCT_FIELD_TYPE_INT, NULL},
   {"description", offsetof(struct mgos_telegram_response, description), MJS_STRUCT_FIELD_TYPE_CHAR_PTR, NULL},
   {NULL, 0, MJS_STRUCT_FIELD_TYPE_INVALID, NULL},
 };
@@ -190,7 +190,7 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
 
   switch (update->type) {
     case MESSAGE: {
-      LOG(LL_INFO, ("%s ->> New message in chat: %lld, from user: %llu, text: %s", 
+      LOG(LL_INFO, ("%s ->> New message in chat: %lld, from user: %llu, text: %s",
                     LIB_NAME, update->chat_id, update->user_id, update->data));
       //Check echo bot mode
       if (tg->cfg->echo_bot) {
@@ -212,7 +212,7 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
       break;
     }
     case CALLBACK_QUERY: {
-      LOG(LL_INFO, ("%s ->> New callback query id: %s, in chat: %lld, from user: %llu, data: %s", 
+      LOG(LL_INFO, ("%s ->> New callback query id: %s, in chat: %lld, from user: %llu, data: %s",
                     LIB_NAME, update->query_id, update->chat_id, update->user_id, update->data));
       //Check permissions for user_id in access list
       if (!mgos_telegram_check_user_access(update->user_id)) break;
@@ -225,7 +225,7 @@ static void mgos_telegram_update_queue_handler(void *userdata) {
       }
       else LOG(LL_DEBUG, ("%s ->> %s  %s", LIB_NAME, "Subscription not found:", update->data));
       break;
-    } 
+    }
     default: {
       break;
     }
@@ -300,7 +300,7 @@ static bool mgos_telegram_is_request_queue_overflow() {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
 
   bool overflow = false;
-  size_t qlen = 0;      
+  size_t qlen = 0;
   struct mgos_telegram_request *request;
 
   STAILQ_FOREACH(request, &tg->request_queue, next) { qlen++; }
@@ -313,12 +313,12 @@ static bool mgos_telegram_is_update_queue_overflow() {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
 
   bool overflow = false;
-  size_t qlen = 0;      
+  size_t qlen = 0;
   struct mgos_telegram_update *update;
 
   STAILQ_FOREACH(update, &tg->update_queue, next) { qlen++; }
   if (qlen >= tg->cfg->update_queue_len) overflow = true;
-  
+
   return overflow;
 }
 
@@ -342,7 +342,7 @@ static bool mgos_telegram_check_user_access(uint64_t user_id) {
     LOG(LL_INFO, ("%s ->> %s", LIB_NAME, "Access list is empty, ignore update"));
     return allowed;
   }
-  
+
   struct json_token t;
   int64_t acl_el;
 
@@ -353,7 +353,7 @@ static bool mgos_telegram_check_user_access(uint64_t user_id) {
       break;
     }
   }
-  
+
   if (allowed) LOG(LL_DEBUG, ("%s ->> Access allowed for user_id: %llu, accept update", LIB_NAME, user_id));
   else LOG(LL_INFO, ("%s ->> Access denied for user_id: %llu, ignore update", LIB_NAME, user_id));
 
@@ -378,10 +378,10 @@ struct mgos_telegram_subscription *mgos_telegram_subscription_search(const char 
 // TELEGRAM PARSERS
 static void mgos_telegram_parse_update(void *source, void *dest, uint32_t *update_id) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
-  
+
   struct http_message *hm = (struct http_message *) source;
   struct mgos_telegram_update *update = (struct mgos_telegram_update *) dest;
-  
+
   struct json_token t;
   json_scanf_array_elem(hm->body.p, hm->body.len, ".result", 0, &t);
   json_scanf(t.ptr, t.len, "{update_id: %u}", &update->update_id);
@@ -398,7 +398,7 @@ static void mgos_telegram_parse_update(void *source, void *dest, uint32_t *updat
         json_scanf(t.ptr, t.len, "{message: {from: {id: %llu}}}", &update->user_id);
         json_scanf(t.ptr, t.len, "{message: {text: %Q}}", &update->data);
         if (update->data == NULL) mg_asprintf(&update->data, 0, "%s", "Unsupported characters");
-        break;      
+        break;
       }
       case CALLBACK_QUERY: {
         json_scanf(t.ptr, t.len, "{callback_query: {from: {id: %llu}}}", &update->user_id);
@@ -406,7 +406,7 @@ static void mgos_telegram_parse_update(void *source, void *dest, uint32_t *updat
         json_scanf(t.ptr, t.len, "{callback_query: {message: {message_id: %u}}}", &update->message_id);
         json_scanf(t.ptr, t.len, "{callback_query: {data: %Q}}", &update->data);
         if (update->data == NULL) mg_asprintf(&update->data, 0, "%s", "Unsupported characters");
-        break;      
+        break;
       }
       default: {
         break;
@@ -441,8 +441,8 @@ static void mgos_telegram_parse_response(void *source, void *dest) {
     }
   }
   else {
-    json_scanf(hm->body.p, hm->body.len, "{error_code: %d, description: %Q}", 
-      &request->response->error_code, &request->response->description);    
+    json_scanf(hm->body.p, hm->body.len, "{error_code: %d, description: %Q}",
+      &request->response->error_code, &request->response->description);
   }
 }
 
@@ -453,7 +453,7 @@ static void mgos_telegram_http_poll_once() {
 
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   tg->poll_connected = true;
-  
+
   char *url = NULL;
   char *eh = NULL;
   char *pd = NULL;
@@ -489,13 +489,13 @@ static void mgos_telegram_http_update_handler(struct mg_connection *nc, int ev, 
     }
     case MG_EV_HTTP_REPLY: {
       LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, "Poll HTTP connection got data"));
-      
-      // IF RX QUEUE OVERFLOW WILL TRY NEXT TIME      
+
+      // IF RX QUEUE OVERFLOW WILL TRY NEXT TIME
       if ( mgos_telegram_is_update_queue_overflow() ) {
-        nc->flags |= MG_F_CLOSE_IMMEDIATELY;        
+        nc->flags |= MG_F_CLOSE_IMMEDIATELY;
         break;
       }
-      
+
       struct http_message *hm = (struct http_message *) ev_data;
       struct mgos_telegram_update *update = mgos_telegram_update_alloc();
 
@@ -503,7 +503,7 @@ static void mgos_telegram_http_update_handler(struct mg_connection *nc, int ev, 
       mgos_telegram_parse_update(hm, update, &update_id);
       if (update_id > 0) {
         tg->update_id = update_id;
-        STAILQ_INSERT_TAIL(&tg->update_queue, update, next);  
+        STAILQ_INSERT_TAIL(&tg->update_queue, update, next);
       }
       else {
         LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, "Poll HTTP connection empty data"));
@@ -538,7 +538,7 @@ static void mgos_telegram_http_send_request(struct mgos_telegram_request *reques
   char *pd = NULL;
 
   mg_asprintf(&eh, 0, "%s", "Content-Type: application/json\r\n");
-  
+
   switch (request->method) {
     case GET_ME: {
       mg_asprintf(&url, 0, "%s/bot%s/%s", tg->cfg->server, tg->cfg->token, "getMe");
@@ -650,7 +650,7 @@ void mgos_telegram_subscribe(const char *data, mgos_telegram_cb_t callback, void
 }
 
 
-void mgos_telegram_send_message_with_callback(int64_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata) {  
+void mgos_telegram_send_message_with_callback(int64_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   if (!tg || !tg->auth_token_tested) {
     LOG(LL_WARN, ("%s ->> %s", LIB_NAME, "Telegram bot is not active, unable execute method"));
@@ -662,7 +662,7 @@ void mgos_telegram_send_message_with_callback(int64_t chat_id, const char *text,
   request->callback = callback;
   request->userdata = userdata;
   request->json = json_asprintf("{chat_id: %lld, text: %Q}", chat_id, text);
-  
+
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Send message ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
   if (!is_added) {
@@ -688,7 +688,7 @@ void mgos_telegram_send_message_json_with_callback(const char *json, mgos_telegr
   request->callback = callback;
   request->userdata = userdata;
   mg_asprintf(&request->json, 0, "%s", json);
-  
+
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Send message ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
   if (!is_added) {
@@ -703,7 +703,7 @@ void mgos_telegram_send_message_json(const char *json){
 }
 
 
-void mgos_telegram_edit_message_text(int64_t chat_id, uint32_t message_id, const char *text) {  
+void mgos_telegram_edit_message_text(int64_t chat_id, uint32_t message_id, const char *text) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   if (!tg || !tg->auth_token_tested) {
     LOG(LL_WARN, ("%s ->> %s", LIB_NAME, "Telegram bot is not active, unable execute method"));
@@ -713,7 +713,7 @@ void mgos_telegram_edit_message_text(int64_t chat_id, uint32_t message_id, const
   struct mgos_telegram_request *request = mgos_telegram_request_alloc();
   request->method = EDIT_MESSAGE_TEXT;
   request->json = json_asprintf("{chat_id: %lld, message_id: %u, text: %Q}", chat_id, message_id, text);
-  
+
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Edit message text ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
   if (!is_added) {
@@ -722,7 +722,7 @@ void mgos_telegram_edit_message_text(int64_t chat_id, uint32_t message_id, const
   }
 }
 
-void mgos_telegram_edit_message_text_json(const char *json) {  
+void mgos_telegram_edit_message_text_json(const char *json) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   if (!tg || !tg->auth_token_tested) {
     LOG(LL_WARN, ("%s ->> %s", LIB_NAME, "Telegram bot is not active, unable execute method"));
@@ -732,7 +732,7 @@ void mgos_telegram_edit_message_text_json(const char *json) {
   struct mgos_telegram_request *request = mgos_telegram_request_alloc();
   request->method = EDIT_MESSAGE_TEXT;
   mg_asprintf(&request->json, 0, "%s", json);
-  
+
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Edit message text ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
   if (!is_added) {
@@ -752,7 +752,7 @@ void mgos_telegram_answer_callback_query(const char *id, const char *text, bool 
   struct mgos_telegram_request *request = mgos_telegram_request_alloc();
   request->method = ANSWER_CALLBACK_QUERY;
   request->json = json_asprintf("{callback_query_id: %Q, text: %Q, show_alert: %B}", id, text, alert);
-  
+
   LOG(LL_DEBUG, ("%s: %s %s", LIB_NAME, "Answer callback query ->>", request->json));
   bool is_added = mgos_telegram_request_queue_add(request);
   if (!is_added) {
@@ -781,7 +781,7 @@ void mgos_telegram_answer_callback_query_json(const char *json) {
 }
 
 
-void mgos_telegram_execute_custom_method_with_callback(const char *method, const char *json, mgos_telegram_cb_t callback, void *userdata) {  
+void mgos_telegram_execute_custom_method_with_callback(const char *method, const char *json, mgos_telegram_cb_t callback, void *userdata) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   if (!tg || !tg->auth_token_tested) {
     LOG(LL_WARN, ("%s ->> %s", LIB_NAME, "Telegram bot is not active, unable execute method"));
@@ -794,7 +794,7 @@ void mgos_telegram_execute_custom_method_with_callback(const char *method, const
   mg_asprintf(&request->json, 0, "%s", json);
   request->callback = callback;
   request->userdata = userdata;
-  
+
   LOG(LL_INFO, ("%s ->> %s %s %s", LIB_NAME, "Execute custom method:", method, json));
   bool is_added = mgos_telegram_request_queue_add(request);
   if (!is_added) {
@@ -849,7 +849,7 @@ static void mgos_telegram_check_token(void) {
   LOG(LL_INFO, ("%s ->> %s", LIB_NAME, "Testing telegram token"));
 
   struct mgos_telegram_request *request;
-  
+
   // Check if GET_ME request is already in the head of the queue
   if (!STAILQ_EMPTY(&tg->request_queue)) {
     request = STAILQ_FIRST(&tg->request_queue);
@@ -879,7 +879,7 @@ static void mgos_telegram_network_cb(int ev, void *ev_data, void *userdata) {
     }
     case MGOS_NET_EV_DISCONNECTED:
     case MGOS_NET_EV_CONNECTING:
-    case MGOS_NET_EV_CONNECTED: 
+    case MGOS_NET_EV_CONNECTED:
     default: {
       mgos_telegram_close_all_connections();
       break;
@@ -916,7 +916,7 @@ static void mgos_telegram_connection_cb(void *ev_data, void *userdata) {
 bool mgos_telegram_check_config(const struct mgos_config_telegram *cfg) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   bool success = false;
-  
+
   if (cfg->server != NULL && cfg->token != NULL) success = true;
   if (success) LOG(LL_INFO, ("%s ->> %s", LIB_NAME, "Configuration OK"));
   else LOG(LL_INFO, ("%s ->> %s", LIB_NAME, "Configuration Error, check configuration files (see mos.yml)"));
