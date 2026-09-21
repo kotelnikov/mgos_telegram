@@ -9,11 +9,11 @@ This library represents a simple [Telegram Bot API](https://core.telegram.org/bo
 
 For using the library you have to provide the internet connection for your IOT device by using the [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md), by using the cellular connection using [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md) or [Ethernet](https://mongoose-os.com/docs/mongoose-os/api/net/ethernet.md).
 
-The library supports Telegram Bot API updates: 
-  - [Message](https://core.telegram.org/bots/api#message) 
+The library supports Telegram Bot API updates:
+  - [Message](https://core.telegram.org/bots/api#message)
   - [CallbackQuery](https://core.telegram.org/bots/api#callbackquery)
 
-The library supports Telegram Bot API requests: 
+The library supports Telegram Bot API requests:
   - [sendMessage](https://core.telegram.org/bots/api#sendmessage)
   - [editMessageText](https://core.telegram.org/bots/api#editmessagetext)
   - [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery)
@@ -211,8 +211,8 @@ let response_handler = function(ed, ud) {
 
 // Update data example in case of an Error
 {
-  ok: false, 
-  error_code: 420, 
+  ok: false,
+  error_code: 420,
   description: 'Flood'
 }
 
@@ -222,7 +222,7 @@ let response_handler = function(ed, ud) {
   type:1, // 1 -> MESSAGE
   message_id: 1464,
   data: "/menu",
-  user_id: 111222333, 
+  user_id: 111222333,
   chat_id: -444555666 // If negative it is a group chat
 }
 
@@ -239,15 +239,15 @@ let response_handler = function(ed, ud) {
 
 // Response data example in case of an Error
 {
-  ok: false, 
-  error_code: 420, 
+  ok: false,
+  error_code: 420,
   description: 'Flood'
 }
 
 // Response data example in case of response to sendMessage
 {
-  ok: true, 
-  message_id: 1464, 
+  ok: true,
+  message_id: 1464,
   chat_id: -444555666 // If negative it is a group chat
 }
 
@@ -329,11 +329,11 @@ let control_panel = {
             [{text: light ? 'SWITCH OFF LIGHT' : 'SWITCH ON LIGHT', callback_data: '/light_toggle'}]
         ];
     },
-	// Method for getting JS object with current control panel 
+	// Method for getting JS object with current control panel
     get_panel: function() {
         return {
             text: this._get_state(),
-            reply_markup: { 
+            reply_markup: {
                 inline_keyboard: this._get_keyboard()
             }
         };
@@ -352,7 +352,7 @@ let updates_handler = function(ed, ud) {
     if (upd.data === '/menu') {
 	    // Check the existence of the control panel in the chat
         for (let i = 0; i < control_panel.all_panels.length; i++) {
-            // If the panel exist return 
+            // If the panel exist return
             if (control_panel.all_panels[i].chat_id === upd.chat_id) { return; }
         }
         // Otherwise build new control panel for the chat
@@ -368,7 +368,7 @@ let updates_handler = function(ed, ud) {
     else if (upd.data === '/alarm_toggle') { alarm = !alarm; }
     // Handle the '/light_toggle' callback query
     else if (upd.data === '/light_toggle') { light = !light; }
-    // Handle the '/light_toggle' callback query    
+    // Handle the '/light_toggle' callback query
     else { return; }
     // Next we send back answer callback query (command received acknowledgment by app)
     TGB.answer(upd.callback_query_id, '⚠ Command received', false);
@@ -377,7 +377,7 @@ let updates_handler = function(ed, ud) {
     for (let i = 0; i < control_panel.all_panels.length; i++) {
         p.chat_id = control_panel.all_panels[i].chat_id;
         p.message_id = control_panel.all_panels[i].message_id;
-        // Update panel instance        
+        // Update panel instance
         TGB.update_js(p);
     }
 };
@@ -535,7 +535,7 @@ void callback(void *ev_data, void *userdata) {
 // Build json string according to the native Telegram Bot API (here we using frozen parser/emitter lib https://github.com/cesanta/frozen)
 char *json = json_asprintf("{chat_id: %d, text: %Q}", 111222333, "Hello from telegram bot lib");
 
-//For example execute sendMessage method 
+//For example execute sendMessage method
 mgos_telegram_execute_custom_method("sendMessage", json);
 
 //The same with callback
@@ -571,7 +571,7 @@ void app_telegram_updates_handler(void *ev_data, void *userdata) {
     // The message data will be passed with ev_data param
     // We have to explain what kind of data it is (it will be type of struct mgos_telegram_response)
     struct mgos_telegram_update *update = (struct mgos_telegram_update *) ev_data;
-	// Print to the terminal update details 
+	// Print to the terminal update details
     LOG(LL_INFO, ("APP ->> chat: %li, data: %s", (long)update->chat_id, update->data));
     // Handle the "/start" command
     if ( strcmp(update->data, "/start") == 0 ) {
@@ -626,20 +626,20 @@ struct app_state {
 // Variable for storing the state
 struct app_state *state = NULL;
 
-// Function returning current state 
+// Function returning current state
 char* get_panel_state() {
   char *res = NULL;
   mg_asprintf(&res, 0, "%s%u\r\n%s%f\r\n%s%s\r\n%s%s",
               "FREE MEM: ", mgos_get_heap_size(),
-              "UPTIME: ", mgos_uptime(),              
+              "UPTIME: ", mgos_uptime(),
               "ALARM: ", state->alarm ? "✅ ON" : "❌ OFF",
               "LIGHT: ", state->light ? "✅ ON" : "❌ OFF"
               );
   return res;
 }
-// Function returning current button state 
+// Function returning current button state
 char* get_panel_keyboard() {
-  char *res = json_asprintf("{inline_keyboard: [[{text: %Q, callback_data: %Q}],[{text: %Q, callback_data: %Q}]]}", 
+  char *res = json_asprintf("{inline_keyboard: [[{text: %Q, callback_data: %Q}],[{text: %Q, callback_data: %Q}]]}",
                 state->alarm ? "SWITCH OFF ALARM" : "SWITCH ON ALARM", "/alarm_toggle",
                 state->light ? "SWITCH OFF LIGHT" : "SWITCH ON LIGHT", "/light_toggle"
                 );
@@ -651,13 +651,13 @@ void update_all_panels() {
   if (SLIST_EMPTY(&state->panels)) return;
   // Getting current state
   char *text = get_panel_state();
-  // Getting current button state 
+  // Getting current button state
   char *keyboard = get_panel_keyboard();
   char *json = NULL;
   struct panel_el *panel;
   // Iterate panels list and update each panel
   SLIST_FOREACH(panel, &state->panels, next) {
-    json = json_asprintf("{chat_id: %d, message_id: %d, text: %Q, reply_markup: %s}", 
+    json = json_asprintf("{chat_id: %d, message_id: %d, text: %Q, reply_markup: %s}",
       panel->chat_id, panel->message_id, text, keyboard);
     mgos_telegram_edit_message_text_json(json);
   }
@@ -705,7 +705,7 @@ void app_telegram_updates_handler(void *ev_data, void *userdata) {
         SLIST_FOREACH(panel, &state->panels, next) {
 		  // If panel is already exist in this chat - return from function
           if (panel->chat_id == update->chat_id) return;
-        };        
+        };
       }
       // Else make new panel
       struct panel_el *new_panel = (struct panel_el *) calloc(1, sizeof(*new_panel));
@@ -714,7 +714,7 @@ void app_telegram_updates_handler(void *ev_data, void *userdata) {
       char *text = get_panel_state();
 	  // Getting current button state
       char *keyboard = get_panel_keyboard();
-	  // Generating the message with actual control panel      
+	  // Generating the message with actual control panel
       char *json = json_asprintf("{chat_id: %d, text: %Q, reply_markup: %s}", update->chat_id, text, keyboard);
 	  // Send message with control panel to the chat
 	  // Here we have to handle the response for getting meaasage id for future updating
@@ -747,7 +747,7 @@ void app_telegram_updates_handler(void *ev_data, void *userdata) {
 
 // APP INIT FN
 enum mgos_app_init_result mgos_app_init(void) {
-  // Allocate memory for the state variable	
+  // Allocate memory for the state variable
   state = (struct app_state *) calloc(1, sizeof(*state));
   // Add initial state for the fake relays
   state->alarm = false;
