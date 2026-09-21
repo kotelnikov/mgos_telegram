@@ -650,7 +650,6 @@ void mgos_telegram_subscribe(const char *data, mgos_telegram_cb_t callback, void
   }
 }
 
-
 void mgos_telegram_send_message_with_callback(int64_t chat_id, const char *text, mgos_telegram_cb_t callback, void *userdata) {
   LOG(LL_DEBUG, ("%s ->> %s", LIB_NAME, __FUNCTION__));
   if (!tg || !tg->auth_token_tested) {

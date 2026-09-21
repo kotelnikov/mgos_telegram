@@ -1,7 +1,7 @@
 [English](https://github.com/kotelnikov/mgos_telegram/blob/main/README.md) |
 [Русский](https://github.com/kotelnikov/mgos_telegram/blob/main/README.ru-Ru.md)
 
-# Библиотека Telegram Bot API для Mongoose OS 
+# Библиотека Telegram Bot API для Mongoose OS
 
 ## Краткое описание
 
@@ -9,11 +9,11 @@
 
 Для функционирования библиотеки в вашем проекте должно быть настроено подключение к интернет через [Wi-Fi](https://mongoose-os.com/docs/mongoose-os/api/net/wifi.md), через GSM модем [PPPOS](https://mongoose-os.com/docs/mongoose-os/api/net/pppos.md) или через проводное подключение [Ethernet](https://mongoose-os.com/docs/mongoose-os/api/net/ethernet.md).
 
-Библиотека поддерживает указанные обновления: 
+Библиотека поддерживает указанные обновления:
   - [Message](https://core.telegram.org/bots/api#message)
   - [CallbackQuery](https://core.telegram.org/bots/api#callbackquery)
 
-Библиотека поддерживает указанные запросы: 
+Библиотека поддерживает указанные запросы:
   - [sendMessage](https://core.telegram.org/bots/api#sendmessage)
   - [editMessageText](https://core.telegram.org/bots/api#editmessagetext)
   - [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery)
@@ -47,7 +47,7 @@ config_schema:
 
 Параметр | Тип | Описание
 ------------ | ------------- | -------------
-`telegram.enable` | `boolean` | Данный параметр включает и выключает использование библиотеки, по умолчанию библиотека выключена, поэтому требуется установить значение `true`. 
+`telegram.enable` | `boolean` | Данный параметр включает и выключает использование библиотеки, по умолчанию библиотека выключена, поэтому требуется установить значение `true`.
 `telegram.token` | `string` | Данный параметр хранит токен для подключения к серверу Telegram и представляет собой строку. Если у Вас нет своего токена, вы можете получить его воспользовавшись инструкцией по [ссылке](https://core.telegram.org/bots#creating-a-new-bot).
 `telegram.echo_bot` | `boolean` | Данный параметр включает/выключает режим эхо бота. Обратите внимание, что по умолчанию данный параметр установлен в значение "true", т.е. в рабочей конфигурации вы должны выключить данный режим, установив значение "false". Иначе принятые сообщения не попадут в функции обратного вызова, поскольку в этом режиме входящая очередь сразу копируется в исходящую.  Данный режим можно использовать для начальной проверки работоспособности библиотеки или корректности вашего токена, достаточно оставить данный режим включенным и не писать вообще никакого кода в `init.js` или `main.c`, в таком случае библиотека будет работать как попугай, присылая вам в ответ все, что вы отправляете сами.
 `telegram.acl` | `string` | Данный параметр хранит список пользователей от которых разрешено принимать сообщения. Параметр представлен в виде строки в JSON нотации содержащей массив ID пользователей. Если список пустой или пришедшее сообщение от пользователя, который не внесен в списке, то такие сообщения будут игнорироваться. Узнать свой ID, можно подписавшись на бота `@myidbot` и спросив ID командой `/getid`. Также id пользователя можно посмотреть в консоли вывода библиотеки, поскольку информация о принятых данных и отправителях выводится в терминал.
@@ -219,7 +219,7 @@ let response_handler = function(ed, ud) {
   type:1, // 1 -> СООБЩЕНИЕ
   message_id: 1464,
   data: "/menu",
-  user_id: 111222333, 
+  user_id: 111222333,
   chat_id: -444555666 // Если отрицательное значение, то это группа
 }
 
@@ -236,15 +236,15 @@ let response_handler = function(ed, ud) {
 
 // Пример ответа на запрос, в случае ошибки
 {
-  ok: false, 
-  error_code: 420, 
+  ok: false,
+  error_code: 420,
   description: 'Flood'
 }
 
 // Пример ответа на запрос sendMessage
 {
-  ok: true, 
-  message_id: 1464, 
+  ok: true,
+  message_id: 1464,
   chat_id: 111222333 // Если отрицательное значение, то это группа
 }
 
@@ -331,7 +331,7 @@ let control_panel = {
     get_panel: function() {
         return {
             text: this._get_state(),
-            reply_markup: { 
+            reply_markup: {
                 inline_keyboard: this._get_keyboard()
             }
         };
@@ -350,7 +350,7 @@ let updates_handler = function(ed, ud) {
     if (upd.data === '/menu') {
 	    // Итерируем массив с существующими панелями управления
         for (let i = 0; i < control_panel.all_panels.length; i++) {
-            // Если панель уже есть в чате, то завершаем обработчик  
+            // Если панель уже есть в чате, то завершаем обработчик
             if (control_panel.all_panels[i].chat_id === upd.chat_id) { return; }
         }
         // Если панели еще нет, то формируем новую панель
@@ -366,16 +366,16 @@ let updates_handler = function(ed, ud) {
     // Обработка нажатия на кнопку '/alarm_toggle'
     else if (upd.data === '/alarm_toggle') {
 		// Инвертируем состояние реле alarm
-		alarm = !alarm; 
+		alarm = !alarm;
 	}
     // Обработка нажатия на кнопку '/light_toggle'
     else if (upd.data === '/light_toggle') {
 		// Инвертируем состояние реле light
-		light = !light; 
+		light = !light;
 	}
 	// Если пришла другая команда то завершаем выполнение обработчика
     else {
-		return; 
+		return;
 	}
     // Отправляем подтверждение о получении команды
     TGB.answer(upd.callback_query_id, '⚠ Command received', false);
@@ -387,7 +387,7 @@ let updates_handler = function(ed, ud) {
 		// Добавляем ключи
         p.chat_id = control_panel.all_panels[i].chat_id;
         p.message_id = control_panel.all_panels[i].message_id;
-        // Обновляем экземпляр панели в чате       
+        // Обновляем экземпляр панели в чате
         TGB.update_js(p);
     }
 };
@@ -445,7 +445,7 @@ mgos_event_add_handler(TGB_EV_CONNECTED, subscription_callback, NULL);
 
 ## mgos_telegram_subscribe()
 
-Используйте данную функцию для выполнения подписки на обновления от Telegram Bot API (обновлениями в терминологии Telegram Bot API называются входящие данные отправленные нашему боту через мессенджер, это могут быть текстовые сообщения или события нажатия кнопки инлайн клавиатуры). Подписка на сообщения и события нажатия на кнопки выполняются одинаково. Возможно подписаться как на всё сразу, путем подписки на команду '*', так и на конкретные команды, которые Вам необходимы. Все обновления, на которые не оформлена подписка будут игнорироваться. При выполнении подписки передается функция обратного вызова, которая будет вызвана при срабатывании подписки. 
+Используйте данную функцию для выполнения подписки на обновления от Telegram Bot API (обновлениями в терминологии Telegram Bot API называются входящие данные отправленные нашему боту через мессенджер, это могут быть текстовые сообщения или события нажатия кнопки инлайн клавиатуры). Подписка на сообщения и события нажатия на кнопки выполняются одинаково. Возможно подписаться как на всё сразу, путем подписки на команду '*', так и на конкретные команды, которые Вам необходимы. Все обновления, на которые не оформлена подписка будут игнорироваться. При выполнении подписки передается функция обратного вызова, которая будет вызвана при срабатывании подписки.
 
 ```C
 void mgos_telegram_subscribe(const char *data, mgos_telegram_cb_t callback, void *userdata);
@@ -545,7 +545,7 @@ void callback(void *ev_data, void *userdata) {
 // JSON строка с параметрами родного API (для генерации JSON используется библиотека frozen https://github.com/cesanta/frozen)
 char *json = json_asprintf("{chat_id: %d, text: %Q}", 111222333, "Hello from telegram bot lib");
 
-//Пример отправки произвольного метода (для примера sendMessage) 
+//Пример отправки произвольного метода (для примера sendMessage)
 mgos_telegram_execute_custom_method("sendMessage", json);
 
 //Тоже самое, но с обработкой ответа
@@ -640,7 +640,7 @@ char* get_panel_state() {
   char *res = NULL;
   mg_asprintf(&res, 0, "%s%u\r\n%s%f\r\n%s%s\r\n%s%s",
               "FREE MEM: ", mgos_get_heap_size(),
-              "UPTIME: ", mgos_uptime(),              
+              "UPTIME: ", mgos_uptime(),
               "ALARM: ", state->alarm ? "✅ ON" : "❌ OFF",
               "LIGHT: ", state->light ? "✅ ON" : "❌ OFF"
               );
@@ -648,7 +648,7 @@ char* get_panel_state() {
 }
 // Функция получения актуального состояния кнопок
 char* get_panel_keyboard() {
-  char *res = json_asprintf("{inline_keyboard: [[{text: %Q, callback_data: %Q}],[{text: %Q, callback_data: %Q}]]}", 
+  char *res = json_asprintf("{inline_keyboard: [[{text: %Q, callback_data: %Q}],[{text: %Q, callback_data: %Q}]]}",
                 state->alarm ? "SWITCH OFF ALARM" : "SWITCH ON ALARM", "/alarm_toggle",
                 state->light ? "SWITCH OFF LIGHT" : "SWITCH ON LIGHT", "/light_toggle"
                 );
@@ -668,7 +668,7 @@ void update_all_panels() {
   // Итерируем список панелей
   SLIST_FOREACH(panel, &state->panels, next) {
 	// Формируем JSON с обновленной панелью
-    json = json_asprintf("{chat_id: %d, message_id: %d, text: %Q, reply_markup: %s}", 
+    json = json_asprintf("{chat_id: %d, message_id: %d, text: %Q, reply_markup: %s}",
       panel->chat_id, panel->message_id, text, keyboard);
 	// Отправляем обновленную панель в чат
     mgos_telegram_edit_message_text_json(json);
@@ -721,10 +721,10 @@ void app_telegram_updates_handler(void *ev_data, void *userdata) {
         SLIST_FOREACH(panel, &state->panels, next) {
 			// Если панель уже есть, завершаем выполнение функции
 			if (panel->chat_id == update->chat_id) return;
-        };        
+        };
       }
       // Если дошли сюда, значит панели в этом чате еще нет
-	  // Создаем новый элемент панели 
+	  // Создаем новый элемент панели
       struct panel_el *new_panel = (struct panel_el *) calloc(1, sizeof(*new_panel));
       new_panel->chat_id = update->chat_id;
 	  // Получаем актуальное состояние панели

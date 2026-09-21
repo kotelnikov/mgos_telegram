@@ -81,7 +81,7 @@ let TGB = {
   DISCONNECTED: tgb_bn + 0,
   CONNECTED:    tgb_bn + 1,
   RECONNECTED:  tgb_bn + 2,
-  // UPDATES  
+  // UPDATES
   MESSAGE: 1,
   CALLBACK_QUERY: 2
 };
